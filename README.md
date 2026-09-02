@@ -94,6 +94,60 @@ and is labelled by the disjunctive accent at the cut. Each leaf records the
 MorphHB path, the inclusive BHSA slot range, the unit text, and its final
 accent.
 
+## Export and ASCII rendering
+
+Export the whole module as JSON Lines, or select verses into a JSON array:
+
+```bash
+python scripts/export_trees.py \
+  --bhsa /path/to/bhsa/tf/2021 \
+  --module tf/2021 \
+  --jsonl --output cantillation-trees.jsonl
+
+python scripts/export_trees.py \
+  --bhsa /path/to/bhsa/tf/2021 \
+  --verse Gen.1.1 --verse Ps.117.1 \
+  --pretty --output selected-trees.json
+```
+
+Render one tree from that export or directly from Text-Fabric:
+
+```bash
+python scripts/render_tree.py --input selected-trees.json --verse Gen.1.1
+python scripts/render_tree.py --bhsa /path/to/bhsa/tf/2021 --verse Job.3.2
+```
+
+Genesis 1:1:
+
+```text
+Atnach
+|-- Tipcha
+|   |-- Tipcha: בְּרֵאשִׁ֖ית
+|   `-- Atnach: בָּרָ֣א אֱלֹהִ֑ים
+`-- Tipcha
+    |-- Tipcha: אֵ֥ת הַשָּׁמַ֖יִם
+    `-- Sof Pasuq: וְאֵ֥ת הָאָֽרֶץ׃
+```
+
+1 Chronicles 1:1:
+
+```text
+Tipcha
+|-- Tipcha: אָדָ֥ם שֵׁ֖ת
+`-- Sof Pasuq: אֱנֽוֹשׁ׃
+```
+
+Job 3:2, using the poetic accent system:
+
+```text
+Revia
+|-- Revia: וַיַּ֥עַן אִיּ֗וֹב
+`-- Sof Pasuq: וַיֹּאמַֽר׃
+```
+
+Add `--details` to show MorphHB paths and inclusive BHSA slot ranges, or
+`--unicode-lines` to use box-drawing connectors.
+
 ## Provenance and licensing
 
 The conversion code is MIT licensed. Generated cantillation features are an

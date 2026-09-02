@@ -1,0 +1,4 @@
+interface:
+  display_name: "BHSA Cantillation Trees"
+  short_description: "Export and render BHSA cantillation trees"
+  default_prompt: "Use $bhsa-cantillation to export a verse tree and render it as terminal art."
