@@ -1,0 +1,11 @@
+{
+  "bhsa": {
+    "repository": "https://github.com/ETCBC/bhsa",
+    "commit": "4db00e2157915495e1a4d3d57e41223df24775da",
+    "tf_version": "2021"
+  },
+  "morphhb": {
+    "repository": "https://github.com/openscriptures/morphhb",
+    "commit": "3d15126fb1ef74867fc1434be1942e837932691f"
+  }
+}
