@@ -110,6 +110,14 @@ catalogues during the build.
 ## Related work
 
 [Josh Waxman's cantillation repository](https://github.com/joshwaxman/cantillation)
-contains serialized prosodic parses for the 21 prose books. This module uses
+contains serialized prosodic parses for the 36 books that use the prose accent
+system. This module uses
 MorphHB instead so that the source structure, poetic books, licensing, and
 alignment provenance remain available.
+
+The two corpora have now been compared over all 18,694 Waxman verses. On the
+18,139 verses with identical consonantal text, 268,351 of 268,685 module
+constituent spans (99.876%) and 124,941 of 125,273 binary cuts (99.735%) occur
+in the Waxman trees. Of 124,941 comparable cut labels, 124,940 agree after
+normalizing accent-name spelling. See the
+[full method, caveats, and reproducible results](comparison/waxman-comparison.md).

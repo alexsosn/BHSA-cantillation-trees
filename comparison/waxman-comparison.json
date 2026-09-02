@@ -1,0 +1,205 @@
+{
+  "sources": {
+    "waxman": {
+      "repository": "https://github.com/joshwaxman/cantillation",
+      "commit": "451f1ca91b7627c84023080e1a7baa18c3b31d89",
+      "file": "prodosic_trees.txt"
+    },
+    "morphhb": {
+      "repository": "https://github.com/openscriptures/morphhb",
+      "commit": "3d15126fb1ef74867fc1434be1942e837932691f"
+    }
+  },
+  "coverage": {
+    "waxman_verses": 18694,
+    "morphhb_verses": 23213,
+    "shared_verses": 18694,
+    "waxman_only": []
+  },
+  "text": {
+    "exact_verses": 18139,
+    "exact_percent": 97.031,
+    "edit_distance_distribution": {
+      "0": 18139,
+      "1": 23,
+      "2": 162,
+      "3": 116,
+      "4": 125,
+      "5": 49,
+      "6": 30,
+      "7": 14,
+      "8": 5,
+      "9": 1,
+      "13": 1,
+      "15": 1,
+      "23": 1,
+      "27": 1,
+      "29": 1,
+      "30": 1,
+      "39": 1,
+      "40": 1,
+      "41": 2,
+      "46": 1,
+      "49": 1,
+      "50": 1,
+      "53": 2,
+      "54": 1,
+      "55": 2,
+      "56": 1,
+      "57": 1,
+      "61": 1,
+      "62": 1,
+      "63": 1,
+      "64": 1,
+      "65": 1,
+      "66": 2,
+      "68": 1,
+      "70": 1,
+      "82": 1
+    },
+    "exact_leaf_segmentation_verses": 16397,
+    "exact_leaf_segmentation_percent": 87.713,
+    "first_nonexact": [
+      {
+        "verse": "1Chr.1.11",
+        "edit_distance": 2
+      },
+      {
+        "verse": "1Chr.10.13",
+        "edit_distance": 5
+      },
+      {
+        "verse": "1Chr.11.19",
+        "edit_distance": 6
+      },
+      {
+        "verse": "1Chr.11.2",
+        "edit_distance": 3
+      },
+      {
+        "verse": "1Chr.11.20",
+        "edit_distance": 3
+      },
+      {
+        "verse": "1Chr.12.16",
+        "edit_distance": 4
+      },
+      {
+        "verse": "1Chr.14.10",
+        "edit_distance": 2
+      },
+      {
+        "verse": "1Chr.18.10",
+        "edit_distance": 4
+      },
+      {
+        "verse": "1Chr.20.5",
+        "edit_distance": 2
+      },
+      {
+        "verse": "1Chr.22.4",
+        "edit_distance": 2
+      },
+      {
+        "verse": "1Chr.26.10",
+        "edit_distance": 4
+      },
+      {
+        "verse": "1Chr.27.14",
+        "edit_distance": 4
+      },
+      {
+        "verse": "1Chr.27.15",
+        "edit_distance": 4
+      },
+      {
+        "verse": "1Chr.4.41",
+        "edit_distance": 3
+      },
+      {
+        "verse": "1Chr.6.20",
+        "edit_distance": 2
+      },
+      {
+        "verse": "1Chr.9.4",
+        "edit_distance": 3
+      },
+      {
+        "verse": "1Kgs.1.27",
+        "edit_distance": 2
+      },
+      {
+        "verse": "1Kgs.10.29",
+        "edit_distance": 3
+      },
+      {
+        "verse": "1Kgs.11.11",
+        "edit_distance": 3
+      },
+      {
+        "verse": "1Kgs.11.32",
+        "edit_distance": 2
+      }
+    ]
+  },
+  "waxman_representation": {
+    "leaves": 234286,
+    "leaves_without_hebrew_letters": 169,
+    "internal_node_arity": {
+      "1": 71207,
+      "2": 202916,
+      "3": 5011,
+      "4": 720,
+      "5": 99,
+      "6": 16,
+      "7": 3
+    }
+  },
+  "structure_on_exact_text": {
+    "verses": 18139,
+    "all_module_spans_present": 17989,
+    "all_module_spans_present_percent": 99.173,
+    "exact_distinct_span_set": 17935,
+    "exact_distinct_span_set_percent": 98.875,
+    "module_constituent_spans": 268685,
+    "covered_constituent_spans": 268351,
+    "covered_constituent_spans_percent": 99.876,
+    "module_branch_cuts": 125273,
+    "waxman_cuts_found": 124941,
+    "waxman_cuts_found_percent": 99.735,
+    "labels_compared": 124941,
+    "labels_matched": 124940,
+    "labels_matched_percent": 99.999,
+    "unmapped_accents": {},
+    "label_disagreements": {
+      "2Chr.17.11: Zaqef Gadol -> ZAKEF_GADOL / ZAKEF_KATON": 1
+    },
+    "first_nonexact_span_sets": [
+      "1Chr.10.1",
+      "1Chr.12.21",
+      "1Chr.12.41",
+      "1Chr.15.18",
+      "1Chr.2.53",
+      "1Chr.20.4",
+      "1Chr.21.12",
+      "1Chr.22.3",
+      "1Chr.27.1",
+      "1Chr.29.2",
+      "1Chr.29.21",
+      "1Kgs.1.36",
+      "1Kgs.10.3",
+      "1Kgs.11.22",
+      "1Kgs.12.16",
+      "1Kgs.12.32",
+      "1Kgs.20.25",
+      "1Kgs.20.29",
+      "1Kgs.21.2",
+      "1Kgs.22.8"
+    ]
+  },
+  "method": {
+    "text": "NFD Hebrew consonants only; vocalization, accents, punctuation, and spaces removed",
+    "structure": "distinct consonantal character spans of accentual units and binary branches",
+    "labels": "MorphHB cut accent compared with the Waxman child ending at the same cut"
+  }
+}
