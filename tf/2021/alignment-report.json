@@ -1,0 +1,1528 @@
+{
+  "stats": {
+    "verses": 23213,
+    "source_words": 305507,
+    "units": 165747,
+    "exact_verses": 23203,
+    "fuzzy_verses": 10,
+    "max_distance": 1,
+    "catalog_fallback_words": 308
+  },
+  "non_exact": [
+    {
+      "osis_id": "Isa.9.6",
+      "bhsa_section": [
+        "Jesaia",
+        9,
+        6
+      ],
+      "distance": 1,
+      "source": [
+        "לםרבה",
+        "המשרה",
+        "ולשלום",
+        "אין",
+        "קץ",
+        "על",
+        "כסא",
+        "דוד",
+        "ועל",
+        "ממלכתו",
+        "להכין",
+        "אתה",
+        "ולסעדה",
+        "במשפט",
+        "ובצדקה",
+        "מעתה",
+        "ועד",
+        "עולם",
+        "קנאת",
+        "יהוה",
+        "צבאות",
+        "תעשה",
+        "זאת"
+      ],
+      "target": [
+        "ל",
+        "מרבה",
+        "ה",
+        "משרה",
+        "ו",
+        "ל",
+        "שלום",
+        "אין",
+        "קץ",
+        "על",
+        "כסא",
+        "דוד",
+        "ו",
+        "על",
+        "ממלכתו",
+        "ל",
+        "הכין",
+        "אתה",
+        "ו",
+        "ל",
+        "סעדה",
+        "ב",
+        "משפט",
+        "ו",
+        "ב",
+        "צדקה",
+        "מ",
+        "עתה",
+        "ו",
+        "עד",
+        "עולם",
+        "קנאת",
+        "יהוה",
+        "צבאות",
+        "תעשה",
+        "זאת"
+      ],
+      "groups": [
+        [
+          215255,
+          215256
+        ],
+        [
+          215257,
+          215258
+        ],
+        [
+          215259,
+          215260,
+          215261
+        ],
+        [
+          215262
+        ],
+        [
+          215263
+        ],
+        [
+          215264
+        ],
+        [
+          215265
+        ],
+        [
+          215266
+        ],
+        [
+          215267,
+          215268
+        ],
+        [
+          215269
+        ],
+        [
+          215270,
+          215271
+        ],
+        [
+          215272
+        ],
+        [
+          215273,
+          215274,
+          215275
+        ],
+        [
+          215276,
+          215277
+        ],
+        [
+          215278,
+          215279,
+          215280
+        ],
+        [
+          215281,
+          215282
+        ],
+        [
+          215283,
+          215284
+        ],
+        [
+          215285
+        ],
+        [
+          215286
+        ],
+        [
+          215287
+        ],
+        [
+          215288
+        ],
+        [
+          215289
+        ],
+        [
+          215290
+        ]
+      ]
+    },
+    {
+      "osis_id": "Jer.18.3",
+      "bhsa_section": [
+        "Jeremia",
+        18,
+        3
+      ],
+      "distance": 1,
+      "source": [
+        "וארד",
+        "בית",
+        "היוצר",
+        "והנהו",
+        "עשה",
+        "מלאכה",
+        "על",
+        "האבנים"
+      ],
+      "target": [
+        "ו",
+        "ארד",
+        "בית",
+        "ה",
+        "יוצר",
+        "ו",
+        "הן",
+        "הו",
+        "עשה",
+        "מלאכה",
+        "על",
+        "ה",
+        "אבנים"
+      ],
+      "groups": [
+        [
+          243704,
+          243705
+        ],
+        [
+          243706
+        ],
+        [
+          243707,
+          243708
+        ],
+        [
+          243709,
+          243710,
+          243711
+        ],
+        [
+          243712
+        ],
+        [
+          243713
+        ],
+        [
+          243714
+        ],
+        [
+          243715,
+          243716
+        ]
+      ]
+    },
+    {
+      "osis_id": "Ezek.4.6",
+      "bhsa_section": [
+        "Ezechiel",
+        4,
+        6
+      ],
+      "distance": 1,
+      "source": [
+        "וכלית",
+        "את",
+        "אלה",
+        "ושכבת",
+        "על",
+        "צדך",
+        "הימיני",
+        "שנית",
+        "ונשאת",
+        "את",
+        "עון",
+        "בית",
+        "יהודה",
+        "ארבעים",
+        "יום",
+        "יום",
+        "לשנה",
+        "יום",
+        "לשנה",
+        "נתתיו",
+        "לך"
+      ],
+      "target": [
+        "ו",
+        "כלית",
+        "את",
+        "אלה",
+        "ו",
+        "שכבת",
+        "על",
+        "צדך",
+        "ה",
+        "ימוני",
+        "שנית",
+        "ו",
+        "נשאת",
+        "את",
+        "עון",
+        "בית",
+        "יהודה",
+        "ארבעים",
+        "יום",
+        "יום",
+        "ל",
+        "",
+        "שנה",
+        "יום",
+        "ל",
+        "",
+        "שנה",
+        "נתתיו",
+        "לך"
+      ],
+      "groups": [
+        [
+          266183,
+          266184
+        ],
+        [
+          266185
+        ],
+        [
+          266186
+        ],
+        [
+          266187,
+          266188
+        ],
+        [
+          266189
+        ],
+        [
+          266190
+        ],
+        [
+          266191,
+          266192
+        ],
+        [
+          266193
+        ],
+        [
+          266194,
+          266195
+        ],
+        [
+          266196
+        ],
+        [
+          266197
+        ],
+        [
+          266198
+        ],
+        [
+          266199
+        ],
+        [
+          266200
+        ],
+        [
+          266201
+        ],
+        [
+          266202,
+          266204
+        ],
+        [
+          266203,
+          266205
+        ],
+        [
+          266206,
+          266208
+        ],
+        [
+          266207,
+          266209
+        ],
+        [
+          266210
+        ],
+        [
+          266211
+        ]
+      ]
+    },
+    {
+      "osis_id": "Ezek.43.11",
+      "bhsa_section": [
+        "Ezechiel",
+        43,
+        11
+      ],
+      "distance": 1,
+      "source": [
+        "ואם",
+        "נכלמו",
+        "מכל",
+        "אשר",
+        "עשו",
+        "צורת",
+        "הבית",
+        "ותכונתו",
+        "ומוצאיו",
+        "ומובאיו",
+        "וכל",
+        "צורתו",
+        "ואת",
+        "כל",
+        "חקתיו",
+        "וכל",
+        "צורתי",
+        "וכל",
+        "תורתו",
+        "הודע",
+        "אותם",
+        "וכתב",
+        "לעיניהם",
+        "וישמרו",
+        "את",
+        "כל",
+        "צורתו",
+        "ואת",
+        "כל",
+        "חקתיו",
+        "ועשו",
+        "אותם"
+      ],
+      "target": [
+        "ו",
+        "אם",
+        "נכלמו",
+        "מ",
+        "כל",
+        "אשר",
+        "עשו",
+        "צורת",
+        "ה",
+        "בית",
+        "ו",
+        "תכונתו",
+        "ו",
+        "מוצאיו",
+        "ו",
+        "מובאיו",
+        "ו",
+        "כל",
+        "צורתו",
+        "ו",
+        "את",
+        "כל",
+        "חקתיו",
+        "ו",
+        "כל",
+        "צורתו",
+        "ו",
+        "כל",
+        "תורתו",
+        "הודע",
+        "אותם",
+        "ו",
+        "כתב",
+        "ל",
+        "עיניהם",
+        "ו",
+        "ישמרו",
+        "את",
+        "כל",
+        "צורתו",
+        "ו",
+        "את",
+        "כל",
+        "חקתיו",
+        "ו",
+        "עשו",
+        "אותם"
+      ],
+      "groups": [
+        [
+          287338,
+          287339
+        ],
+        [
+          287340
+        ],
+        [
+          287341,
+          287342
+        ],
+        [
+          287343
+        ],
+        [
+          287344
+        ],
+        [
+          287345
+        ],
+        [
+          287346,
+          287347
+        ],
+        [
+          287348,
+          287349
+        ],
+        [
+          287350,
+          287351
+        ],
+        [
+          287352,
+          287353
+        ],
+        [
+          287354,
+          287355
+        ],
+        [
+          287356
+        ],
+        [
+          287357,
+          287358
+        ],
+        [
+          287359
+        ],
+        [
+          287360
+        ],
+        [
+          287361,
+          287362
+        ],
+        [
+          287363
+        ],
+        [
+          287364,
+          287365
+        ],
+        [
+          287366
+        ],
+        [
+          287367
+        ],
+        [
+          287368
+        ],
+        [
+          287369,
+          287370
+        ],
+        [
+          287371,
+          287372
+        ],
+        [
+          287373,
+          287374
+        ],
+        [
+          287375
+        ],
+        [
+          287376
+        ],
+        [
+          287377
+        ],
+        [
+          287378,
+          287379
+        ],
+        [
+          287380
+        ],
+        [
+          287381
+        ],
+        [
+          287382,
+          287383
+        ],
+        [
+          287384
+        ]
+      ]
+    },
+    {
+      "osis_id": "Job.38.1",
+      "bhsa_section": [
+        "Iob",
+        38,
+        1
+      ],
+      "distance": 1,
+      "source": [
+        "ויען",
+        "יהוה",
+        "את",
+        "איוב",
+        "מנ",
+        "הסערה",
+        "ויאמר"
+      ],
+      "target": [
+        "ו",
+        "יען",
+        "יהוה",
+        "את",
+        "איוב",
+        "מן",
+        "ה",
+        "סערה",
+        "ו",
+        "יאמר"
+      ],
+      "groups": [
+        [
+          345441,
+          345442
+        ],
+        [
+          345443
+        ],
+        [
+          345444
+        ],
+        [
+          345445
+        ],
+        [
+          345446
+        ],
+        [
+          345447,
+          345448
+        ],
+        [
+          345449,
+          345450
+        ]
+      ]
+    },
+    {
+      "osis_id": "Job.40.6",
+      "bhsa_section": [
+        "Iob",
+        40,
+        6
+      ],
+      "distance": 1,
+      "source": [
+        "ויען",
+        "יהוה",
+        "את",
+        "איוב",
+        "מנ",
+        "סערה",
+        "ויאמר"
+      ],
+      "target": [
+        "ו",
+        "יען",
+        "יהוה",
+        "את",
+        "איוב",
+        "מן",
+        "סערה",
+        "ו",
+        "יאמר"
+      ],
+      "groups": [
+        [
+          346167,
+          346168
+        ],
+        [
+          346169
+        ],
+        [
+          346170
+        ],
+        [
+          346171
+        ],
+        [
+          346172
+        ],
+        [
+          346173
+        ],
+        [
+          346174,
+          346175
+        ]
+      ]
+    },
+    {
+      "osis_id": "Dan.10.19",
+      "bhsa_section": [
+        "Daniel",
+        10,
+        19
+      ],
+      "distance": 1,
+      "source": [
+        "ויאמר",
+        "אל",
+        "תירא",
+        "איש",
+        "חמדות",
+        "שלום",
+        "לך",
+        "חזק",
+        "וחזק",
+        "ובדברו",
+        "עמי",
+        "התחזקתי",
+        "ואמרה",
+        "ידבר",
+        "אדני",
+        "כי",
+        "חזקתני"
+      ],
+      "target": [
+        "ו",
+        "יאמר",
+        "אל",
+        "תירא",
+        "איש",
+        "חמדות",
+        "שלום",
+        "לך",
+        "חזק",
+        "ו",
+        "חזק",
+        "ו",
+        "כ",
+        "דברו",
+        "עמי",
+        "התחזקתי",
+        "ו",
+        "אמרה",
+        "ידבר",
+        "אדני",
+        "כי",
+        "חזקתני"
+      ],
+      "groups": [
+        [
+          376857,
+          376858
+        ],
+        [
+          376859
+        ],
+        [
+          376860
+        ],
+        [
+          376861
+        ],
+        [
+          376862
+        ],
+        [
+          376863
+        ],
+        [
+          376864
+        ],
+        [
+          376865
+        ],
+        [
+          376866,
+          376867
+        ],
+        [
+          376868,
+          376869,
+          376870
+        ],
+        [
+          376871
+        ],
+        [
+          376872
+        ],
+        [
+          376873,
+          376874
+        ],
+        [
+          376875
+        ],
+        [
+          376876
+        ],
+        [
+          376877
+        ],
+        [
+          376878
+        ]
+      ]
+    },
+    {
+      "osis_id": "Ezra.10.44",
+      "bhsa_section": [
+        "Esra",
+        10,
+        44
+      ],
+      "distance": 1,
+      "source": [
+        "כל",
+        "אלה",
+        "נשאי",
+        "נשים",
+        "נכריות",
+        "ויש",
+        "מהם",
+        "נשים",
+        "וישימו",
+        "בנים"
+      ],
+      "target": [
+        "כל",
+        "אלה",
+        "נשאו",
+        "נשים",
+        "נכריות",
+        "ו",
+        "יש",
+        "מהם",
+        "נשים",
+        "ו",
+        "ישימו",
+        "בנים"
+      ],
+      "groups": [
+        [
+          383407
+        ],
+        [
+          383408
+        ],
+        [
+          383409
+        ],
+        [
+          383410
+        ],
+        [
+          383411
+        ],
+        [
+          383412,
+          383413
+        ],
+        [
+          383414
+        ],
+        [
+          383415
+        ],
+        [
+          383416,
+          383417
+        ],
+        [
+          383418
+        ]
+      ]
+    },
+    {
+      "osis_id": "Neh.2.13",
+      "bhsa_section": [
+        "Nehemia",
+        2,
+        13
+      ],
+      "distance": 1,
+      "source": [
+        "ואצאה",
+        "בשער",
+        "הגיא",
+        "לילה",
+        "ואל",
+        "פני",
+        "עין",
+        "התנין",
+        "ואל",
+        "שער",
+        "האשפת",
+        "ואהי",
+        "שבר",
+        "בחומת",
+        "ירושלם",
+        "אשר",
+        "המפרוצים",
+        "ושעריה",
+        "אכלו",
+        "באש"
+      ],
+      "target": [
+        "ו",
+        "אצאה",
+        "ב",
+        "שער",
+        "ה",
+        "גיא",
+        "לילה",
+        "ו",
+        "אל",
+        "פני",
+        "עיןהתנין",
+        "ו",
+        "אל",
+        "שער",
+        "ה",
+        "אשפת",
+        "ו",
+        "אהי",
+        "שבר",
+        "ב",
+        "חומת",
+        "ירושלם",
+        "אשר",
+        "הם",
+        "פרוצים",
+        "ו",
+        "שעריה",
+        "אכלו",
+        "ב",
+        "",
+        "אש"
+      ],
+      "groups": [
+        [
+          384030,
+          384031
+        ],
+        [
+          384032,
+          384033
+        ],
+        [
+          384034,
+          384035
+        ],
+        [
+          384036
+        ],
+        [
+          384037,
+          384038
+        ],
+        [
+          384039
+        ],
+        [
+          384040
+        ],
+        [
+          384040
+        ],
+        [
+          384041,
+          384042
+        ],
+        [
+          384043
+        ],
+        [
+          384044,
+          384045
+        ],
+        [
+          384046,
+          384047
+        ],
+        [
+          384048
+        ],
+        [
+          384049,
+          384050
+        ],
+        [
+          384051
+        ],
+        [
+          384052
+        ],
+        [
+          384053,
+          384054
+        ],
+        [
+          384055,
+          384056
+        ],
+        [
+          384057,
+          384059
+        ],
+        [
+          384058,
+          384060
+        ]
+      ]
+    },
+    {
+      "osis_id": "1Chr.27.12",
+      "bhsa_section": [
+        "Chronica_I",
+        27,
+        12
+      ],
+      "distance": 1,
+      "source": [
+        "התשיעי",
+        "לחדש",
+        "התשיעי",
+        "אביעזר",
+        "הענתתי",
+        "לבנימיני",
+        "ועל",
+        "מחלקתו",
+        "עשרים",
+        "וארבעה",
+        "אלף"
+      ],
+      "target": [
+        "ה",
+        "תשיעי",
+        "ל",
+        "",
+        "חדש",
+        "ה",
+        "תשיעי",
+        "אביעזר",
+        "ה",
+        "ענתתי",
+        "ל",
+        "",
+        "בן",
+        "ימיני",
+        "ו",
+        "על",
+        "מחלקתו",
+        "עשרים",
+        "ו",
+        "ארבעה",
+        "אלף"
+      ],
+      "groups": [
+        [
+          405096,
+          405097,
+          405099
+        ],
+        [
+          405098,
+          405100
+        ],
+        [
+          405101,
+          405102
+        ],
+        [
+          405103
+        ],
+        [
+          405104,
+          405105,
+          405107
+        ],
+        [
+          405106,
+          405108,
+          405109
+        ],
+        [
+          405110,
+          405111
+        ],
+        [
+          405112
+        ],
+        [
+          405113
+        ],
+        [
+          405114,
+          405115
+        ],
+        [
+          405116
+        ]
+      ]
+    }
+  ],
+  "uncatalogued_patterns": [
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֨־",
+      "fallback_name": "HEBREW ACCENT QADMA + HEBREW PUNCTUATION MAQAF",
+      "count": 105
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֣׀",
+      "fallback_name": "HEBREW ACCENT MUNAH + HEBREW PUNCTUATION PASEQ",
+      "count": 35
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "ֽ",
+      "fallback_name": "HEBREW POINT METEG",
+      "count": 19
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "֣֭",
+      "fallback_name": "HEBREW ACCENT DEHI + HEBREW ACCENT MUNAH",
+      "count": 14
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֥־",
+      "fallback_name": "HEBREW ACCENT MERKHA + HEBREW PUNCTUATION MAQAF",
+      "count": 11
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֘",
+      "fallback_name": "HEBREW ACCENT ZARQA",
+      "count": 11
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֣־",
+      "fallback_name": "HEBREW ACCENT MUNAH + HEBREW PUNCTUATION MAQAF",
+      "count": 9
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֖־",
+      "fallback_name": "HEBREW ACCENT TIPEHA + HEBREW PUNCTUATION MAQAF",
+      "count": 8
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֖",
+      "fallback_name": "HEBREW ACCENT TIPEHA",
+      "count": 6
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֫־",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT OLE + HEBREW PUNCTUATION MAQAF",
+      "count": 6
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "֫־",
+      "fallback_name": "HEBREW ACCENT OLE + HEBREW PUNCTUATION MAQAF",
+      "count": 5
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "֥־",
+      "fallback_name": "HEBREW ACCENT MERKHA + HEBREW PUNCTUATION MAQAF",
+      "count": 5
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "֬֨׀",
+      "fallback_name": "HEBREW ACCENT ILUY + HEBREW ACCENT QADMA + HEBREW PUNCTUATION PASEQ",
+      "count": 4
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "֤־",
+      "fallback_name": "HEBREW ACCENT MAHAPAKH + HEBREW PUNCTUATION MAQAF",
+      "count": 4
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "֥֭",
+      "fallback_name": "HEBREW ACCENT DEHI + HEBREW ACCENT MERKHA",
+      "count": 4
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֛",
+      "fallback_name": "HEBREW ACCENT TEVIR",
+      "count": 3
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֣־",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT MUNAH + HEBREW PUNCTUATION MAQAF",
+      "count": 3
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֤־",
+      "fallback_name": "HEBREW ACCENT MAHAPAKH + HEBREW PUNCTUATION MAQAF",
+      "count": 3
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "֣",
+      "fallback_name": "HEBREW ACCENT MUNAH",
+      "count": 3
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "ֽ֣֭",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT DEHI + HEBREW ACCENT MUNAH",
+      "count": 3
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֜",
+      "fallback_name": "HEBREW ACCENT GERESH",
+      "count": 2
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֥־",
+      "fallback_name": "HEBREW ACCENT MERKHA + HEBREW POINT METEG + HEBREW PUNCTUATION MAQAF",
+      "count": 2
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֤־",
+      "fallback_name": "HEBREW ACCENT MAHAPAKH + HEBREW POINT METEG + HEBREW PUNCTUATION MAQAF",
+      "count": 2
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "֣־",
+      "fallback_name": "HEBREW ACCENT MUNAH + HEBREW PUNCTUATION MAQAF",
+      "count": 2
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֔",
+      "fallback_name": "HEBREW ACCENT ZAQEF QATAN",
+      "count": 2
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֘",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT ZARQA",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֨־",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT QADMA + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "ֽ׀",
+      "fallback_name": "HEBREW POINT METEG + HEBREW PUNCTUATION PASEQ",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֝",
+      "fallback_name": "HEBREW ACCENT GERESH MUQDAM",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "֤֖",
+      "fallback_name": "HEBREW ACCENT MAHAPAKH + HEBREW ACCENT TIPEHA",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "֨֙׀",
+      "fallback_name": "HEBREW ACCENT QADMA + HEBREW ACCENT PASHTA + HEBREW PUNCTUATION PASEQ",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֠",
+      "fallback_name": "HEBREW ACCENT TELISHA GEDOLA",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "֛׃",
+      "fallback_name": "HEBREW ACCENT TEVIR + HEBREW PUNCTUATION SOF PASUQ",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "ֽ־׃",
+      "fallback_name": "HEBREW POINT METEG + HEBREW PUNCTUATION MAQAF + HEBREW PUNCTUATION SOF PASUQ",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "֖־",
+      "fallback_name": "HEBREW ACCENT TIPEHA + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֝֠",
+      "fallback_name": "HEBREW ACCENT GERESH MUQDAM + HEBREW ACCENT TELISHA GEDOLA",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֖־",
+      "fallback_name": "HEBREW ACCENT TIPEHA + HEBREW POINT METEG + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "֙־",
+      "fallback_name": "HEBREW ACCENT PASHTA + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "֥",
+      "fallback_name": "HEBREW ACCENT MERKHA",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֤֨",
+      "fallback_name": "HEBREW ACCENT MAHAPAKH + HEBREW ACCENT QADMA",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֤־",
+      "fallback_name": "HEBREW ACCENT MAHAPAKH + HEBREW POINT METEG + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֧־",
+      "fallback_name": "HEBREW ACCENT DARGA + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "֥֨׀",
+      "fallback_name": "HEBREW ACCENT MERKHA + HEBREW ACCENT QADMA + HEBREW PUNCTUATION PASEQ",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֥־",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT MERKHA + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "֣",
+      "fallback_name": "HEBREW ACCENT MUNAH",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "֨",
+      "fallback_name": "HEBREW ACCENT QADMA",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "֤֣׀",
+      "fallback_name": "HEBREW ACCENT MAHAPAKH + HEBREW ACCENT MUNAH + HEBREW PUNCTUATION PASEQ",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "֗֜",
+      "fallback_name": "HEBREW ACCENT REVIA + HEBREW ACCENT GERESH",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֬־",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT ILUY + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "ֽ֣֭",
+      "fallback_name": "HEBREW ACCENT MUNAH + HEBREW ACCENT DEHI + HEBREW POINT METEG",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֭־",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT DEHI + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "",
+      "fallback_name": "None",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֝־",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT GERESH MUQDAM + HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "disjunctive",
+      "marks": "֣֭",
+      "fallback_name": "HEBREW ACCENT MUNAH + HEBREW ACCENT DEHI",
+      "count": 1
+    },
+    {
+      "system": "poetic",
+      "accent_type": "conjunctive",
+      "marks": "֭",
+      "fallback_name": "HEBREW ACCENT DEHI",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "ֽ֖",
+      "fallback_name": "HEBREW POINT METEG + HEBREW ACCENT TIPEHA",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "֨",
+      "fallback_name": "HEBREW ACCENT QADMA",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "ֽֽ",
+      "fallback_name": "HEBREW POINT METEG + HEBREW POINT METEG",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "֥֣׀",
+      "fallback_name": "HEBREW ACCENT MERKHA + HEBREW ACCENT MUNAH + HEBREW PUNCTUATION PASEQ",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "disjunctive",
+      "marks": "־",
+      "fallback_name": "HEBREW PUNCTUATION MAQAF",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֑",
+      "fallback_name": "HEBREW ACCENT ETNAHTA",
+      "count": 1
+    },
+    {
+      "system": "prose",
+      "accent_type": "conjunctive",
+      "marks": "֧֞",
+      "fallback_name": "HEBREW ACCENT DARGA + HEBREW ACCENT GERSHAYIM",
+      "count": 1
+    }
+  ]
+}
