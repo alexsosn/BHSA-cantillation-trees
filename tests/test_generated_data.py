@@ -19,6 +19,18 @@ FEATURES = {
     "cantillation_tree",
     "cantillation_unit",
     "cantillation_unit_path",
+    "cantillation_accent_signature",
+    "cantillation_branch_signature",
+    "cantillation_colless",
+    "cantillation_colless_normalized",
+    "cantillation_depth",
+    "cantillation_depth_leaf_ratio",
+    "cantillation_leaf_count",
+    "cantillation_longest_accent_run",
+    "cantillation_longest_ladder",
+    "cantillation_mean_leaf_depth",
+    "cantillation_sackin",
+    "cantillation_shape",
 }
 
 

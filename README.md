@@ -24,6 +24,18 @@ accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 | `cantillation_system` | `verse` | `prose` or `poetic` |
 | `cantillation_tree` | `verse` | Compact JSON binary tree |
 | `cantillation_alignment` | `verse` | `exact` or `fuzzy` |
+| `cantillation_shape` | `verse` | Unlabelled shape, e.g. `((L,L),(L,L))` |
+| `cantillation_branch_signature` | `verse` | Shape with internal accent labels |
+| `cantillation_accent_signature` | `verse` | Shape with internal and leaf accents |
+| `cantillation_depth` | `verse` | Maximum root-to-leaf depth in edges |
+| `cantillation_leaf_count` | `verse` | Number of accentual-unit leaves |
+| `cantillation_mean_leaf_depth` | `verse` | Mean root-to-leaf depth |
+| `cantillation_colless` | `verse` | Colless imbalance index |
+| `cantillation_colless_normalized` | `verse` | Colless divided by its maximum for the leaf count |
+| `cantillation_sackin` | `verse` | Sum of all leaf depths |
+| `cantillation_longest_ladder` | `verse` | Longest run of nested `1:(n-1)` splits |
+| `cantillation_longest_accent_run` | `verse` | Longest same-accent run on a root-to-leaf path |
+| `cantillation_depth_leaf_ratio` | `verse` | Maximum depth divided by leaf count |
 
 Because BHSA slots represent morphological words, an orthographic MorphHB word
 can correspond to several BHSA `word` nodes. Accent features are placed on the
@@ -93,6 +105,14 @@ The value of `cantillation_tree` is JSON. Each internal node has two children
 and is labelled by the disjunctive accent at the cut. Each leaf records the
 MorphHB path, the inclusive BHSA slot range, the unit text, and its final
 accent.
+
+The mean-depth, normalized-Colless, and depth/leaf features are stored as
+decimal strings because Text-Fabric node features support integer and string
+values. Decimal output is rounded to at most six places. For one or two leaves,
+where the maximum Colless value `(n-1)(n-2)/2` is zero, the normalized value is
+defined as zero. `cantillation_longest_ladder` counts consecutive internal
+nodes where exactly one child is a leaf; `cantillation_longest_accent_run`
+includes both internal nodes and leaves.
 
 ## Export and ASCII rendering
 

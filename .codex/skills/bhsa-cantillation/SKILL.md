@@ -31,8 +31,9 @@ python scripts/export_trees.py \
   --pretty --output selected-trees.json
 ```
 
-Each record contains `osis_id`, `bhsa_section`, `system`, `alignment`, and `tree`.
-Preserve those provenance fields when handing JSON to another agent or program.
+Each record contains `osis_id`, `bhsa_section`, `system`, `alignment`, `signatures`,
+`metrics`, and `tree`. Preserve the reference and provenance fields when handing JSON to
+another agent or program.
 
 ## Render
 
@@ -64,6 +65,9 @@ matter; omit it for documentation and ordinary inspection.
   record.
 - `alignment=fuzzy` preserves a documented MorphHB/BHSA consonantal difference. Do not
   silently relabel it as exact.
+- `signatures` contains the unlabelled shape, branch-labelled shape, and fully
+  accent-labelled shape. `metrics` contains depth, leaf count, mean leaf depth, Colless,
+  normalized Colless, Sackin, longest ladder, longest accent run, and depth/leaf ratio.
 
 When changing either script or the schema, run `python -m pytest` and
 `python -m ruff check src tests scripts` before reporting success.

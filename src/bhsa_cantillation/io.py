@@ -12,9 +12,33 @@ from tf.fabric import Fabric
 from .books import BOOKS
 
 BHSA_TO_OSIS = {bhsa: osis for osis, bhsa in BOOKS}
-TREE_FEATURES = (
-    "book chapter verse cantillation_tree cantillation_system "
-    "cantillation_alignment"
+SIGNATURE_FEATURES = (
+    "cantillation_shape",
+    "cantillation_branch_signature",
+    "cantillation_accent_signature",
+)
+METRIC_FEATURES = (
+    "cantillation_depth",
+    "cantillation_leaf_count",
+    "cantillation_mean_leaf_depth",
+    "cantillation_colless",
+    "cantillation_colless_normalized",
+    "cantillation_sackin",
+    "cantillation_longest_ladder",
+    "cantillation_longest_accent_run",
+    "cantillation_depth_leaf_ratio",
+)
+TREE_FEATURES = " ".join(
+    (
+        "book",
+        "chapter",
+        "verse",
+        "cantillation_tree",
+        "cantillation_system",
+        "cantillation_alignment",
+        *SIGNATURE_FEATURES,
+        *METRIC_FEATURES,
+    )
 )
 
 
@@ -43,6 +67,14 @@ def tree_records(api) -> Iterator[dict]:
             "bhsa_section": [bhsa_book, chapter, verse],
             "system": F.cantillation_system.v(verse_node),
             "alignment": F.cantillation_alignment.v(verse_node),
+            "signatures": {
+                name.removeprefix("cantillation_"): getattr(F, name).v(verse_node)
+                for name in SIGNATURE_FEATURES
+            },
+            "metrics": {
+                name.removeprefix("cantillation_"): getattr(F, name).v(verse_node)
+                for name in METRIC_FEATURES
+            },
             "tree": json.loads(serialized),
         }
 

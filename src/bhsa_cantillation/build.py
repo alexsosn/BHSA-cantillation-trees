@@ -11,6 +11,7 @@ from tf.fabric import Fabric
 
 from .alignment import align_words
 from .books import BOOKS
+from .metrics import tree_features
 from .model import WordAlignment
 from .morphhb import accent_system, load_accent_catalog, normalize_consonants, read_book
 from .tree import build_tree, make_units
@@ -70,6 +71,56 @@ FEATURE_META = {
     },
     "cantillation_alignment": {
         "description": "MorphHB-to-BHSA verse alignment quality (exact or fuzzy)",
+        "valueType": "str",
+    },
+    "cantillation_shape": {
+        "description": "unlabelled binary tree signature using L for each leaf",
+        "valueType": "str",
+    },
+    "cantillation_branch_signature": {
+        "description": "binary tree signature with accents on branches and L for leaves",
+        "valueType": "str",
+    },
+    "cantillation_accent_signature": {
+        "description": "binary tree signature with accent labels on branches and leaves",
+        "valueType": "str",
+    },
+    "cantillation_depth": {
+        "description": "maximum root-to-leaf depth measured in edges",
+        "valueType": "int",
+    },
+    "cantillation_leaf_count": {
+        "description": "number of accentual-unit leaves",
+        "valueType": "int",
+    },
+    "cantillation_mean_leaf_depth": {
+        "description": "arithmetic mean root-to-leaf depth, serialized as a decimal string",
+        "valueType": "str",
+    },
+    "cantillation_colless": {
+        "description": "Colless imbalance index over accentual-unit leaves",
+        "valueType": "int",
+    },
+    "cantillation_colless_normalized": {
+        "description": (
+            "Colless index divided by (n-1)(n-2)/2, serialized as a decimal string"
+        ),
+        "valueType": "str",
+    },
+    "cantillation_sackin": {
+        "description": "Sackin index (sum of root-to-leaf depths)",
+        "valueType": "int",
+    },
+    "cantillation_longest_ladder": {
+        "description": "longest run of nested 1-to-(n-1) branch splits",
+        "valueType": "int",
+    },
+    "cantillation_longest_accent_run": {
+        "description": "longest same-accent run along a root-to-leaf path, including leaves",
+        "valueType": "int",
+    },
+    "cantillation_depth_leaf_ratio": {
+        "description": "maximum depth divided by leaf count, serialized as a decimal string",
         "valueType": "str",
     },
 }
@@ -205,6 +256,8 @@ def build_module(
                 tree, ensure_ascii=False, separators=(",", ":")
             )
             features["cantillation_alignment"][verse_node] = result.status
+            for feature, value in tree_features(tree).items():
+                features[feature][verse_node] = value
 
             verse_count += 1
             source_word_count += len(source_words)

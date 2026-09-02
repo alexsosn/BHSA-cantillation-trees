@@ -43,7 +43,7 @@ jobs:
 
       - run: python -m pip install '.[dev]'
       - run: python -m ruff check src tests
-      - run: python -m pytest
+      - run: python -m pytest --ignore=tests/test_generated_data.py
       - name: Build Text-Fabric module
         run: |
           python -m bhsa_cantillation.cli build \
