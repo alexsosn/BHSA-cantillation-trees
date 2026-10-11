@@ -12,7 +12,7 @@ from tf.fabric import Fabric
 from .alignment import align_words
 from .books import BOOKS
 from .metrics import tree_features
-from .model import WordAlignment
+from .model import SourceWord, WordAlignment
 from .morphhb import accent_system, load_accent_catalog, normalize_consonants, read_book
 from .tree import build_tree, make_units
 
@@ -43,6 +43,20 @@ FEATURE_META = {
     },
     "cantillation_accent_status": {
         "description": "whether the accent combination occurs in the MorphHB catalogue",
+        "valueType": "str",
+    },
+    "cantillation_catalog_rank": {
+        "description": (
+            "raw MorphHB AccentCatalog.js rank at orthographic-word endpoint; "
+            "missing values omitted, multiple source words separated by |"
+        ),
+        "valueType": "str",
+    },
+    "cantillation_catalog_final": {
+        "description": (
+            "raw MorphHB AccentCatalog.js optional final flag, 1=true, 0=false; "
+            "missing is unknown/omitted, multiple source words separated by |"
+        ),
         "valueType": "str",
     },
     "cantillation_source_id": {
@@ -132,6 +146,19 @@ def _append_value(
     text = str(value)
     previous = feature.get(node)
     feature[node] = text if previous is None else f"{previous}{separator}{text}"
+
+
+def _append_catalogue_features(
+    features: dict[str, dict[int, str | int]], endpoint: int, source: SourceWord
+) -> None:
+    """Project only explicitly catalogued rank/final fields to the last BHSA slot."""
+    if source.accent_catalogued:
+        if source.accent_rank is not None:
+            _append_value(features["cantillation_catalog_rank"], endpoint, source.accent_rank)
+        if source.accent_final is not None:
+            _append_value(
+                features["cantillation_catalog_final"], endpoint, "1" if source.accent_final else "0"
+            )
 
 
 def _metadata(version: str, source_commit: str | None) -> dict:
@@ -234,6 +261,7 @@ def build_module(
                 _append_value(features["cantillation_accent"], endpoint, source.accent_name)
                 _append_value(features["cantillation_accent_type"], endpoint, source.accent_type)
                 _append_value(features["cantillation_source_id"], endpoint, source.source_id)
+                _append_catalogue_features(features, endpoint, source)
                 status = "catalogued" if source.accent_catalogued else "unicode-fallback"
                 _append_value(features["cantillation_accent_status"], endpoint, status)
                 if source.accent_marks:
