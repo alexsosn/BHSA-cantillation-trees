@@ -85,7 +85,7 @@ def test_catalogue_endpoint_features_are_raw_source_strings():
         assert meta["source"].endswith("/pinned-source")
 
 
-def test_uncatalogued_manual_word_never_projects_inventedbuild._metadata():
+def test_uncatalogued_manual_word_never_projects_invented_metadata():
     features = {"cantillation_catalog_rank": {}, "cantillation_catalog_final": {}}
     bad = SourceWord("fallback", "x", "x", 1, accent_rank=9, accent_final=True)
     build._append_catalogue_features(features, 42, (bad,))
