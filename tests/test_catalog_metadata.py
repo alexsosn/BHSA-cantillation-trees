@@ -99,3 +99,22 @@ def test_projection_keeps_source_position_through_fallbacks():
     _append_catalogue_features(features, 7, (fallback, known))
     assert features["cantillation_catalog_rank"][7] == "? | 3"
     assert 7 not in features["cantillation_catalog_final"]
+
+
+def test_malformed_catalogue_values_fail_closed():
+    from pytest import raises
+
+    original = CATALOG["prose"]["disjunctive"]["\u0596"]
+    CATALOG["prose"]["disjunctive"]["\u0596"] = {
+        "name": "Tipcha", "rank": True, "final": 1
+    }
+    try:
+        with raises(ValueError, match="rank"):
+            parse_word("Gen.1.1", "דָּבָ֖ר")
+        CATALOG["prose"]["disjunctive"]["\u0596"] = {
+            "name": "Tipcha", "rank": "1", "final": 1
+        }
+        with raises(ValueError, match="final"):
+            parse_word("Gen.1.1", "דָּבָ֖ר")
+    finally:
+        CATALOG["prose"]["disjunctive"]["\u0596"] = original
