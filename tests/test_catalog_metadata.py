@@ -63,9 +63,15 @@ def test_meteg_lookup_inherits_only_source_catalogue_fields():
 
 def test_endpoint_projection_preserves_multiple_source_words_without_mixing_missing():
     features = {"cantillation_catalog_rank": {}, "cantillation_catalog_final": {}}
-    first = SourceWord("w1", "x", "x", 1, accent_catalogued=True, accent_rank=0, accent_final=None)
-    second = SourceWord("w2", "y", "y", 1, accent_catalogued=True, accent_rank=1, accent_final=True)
-    third = SourceWord("w3", "z", "z", 1, accent_catalogued=True, accent_rank=2, accent_final=False)
+    first = SourceWord(
+        "w1", "x", "x", 1, accent_catalogued=True, accent_rank=0, accent_final=None
+    )
+    second = SourceWord(
+        "w2", "y", "y", 1, accent_catalogued=True, accent_rank=1, accent_final=True
+    )
+    third = SourceWord(
+        "w3", "z", "z", 1, accent_catalogued=True, accent_rank=2, accent_final=False
+    )
     for word in (first, second, third):
         _append_catalogue_features(features, 42, word)
     assert features["cantillation_catalog_rank"][42] == "0 | 1 | 2"
