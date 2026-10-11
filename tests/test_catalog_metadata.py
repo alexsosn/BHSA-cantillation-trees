@@ -2,7 +2,7 @@
 
 from xml.etree import ElementTree as ET
 
-from bhsa_cantillation.build import FEATURE_META, _append_catalogue_features, _metadata
+from bhsa_cantillation import build
 from bhsa_cantillation.model import SourceWord
 from bhsa_cantillation.morphhb import NS, parse_verse
 
@@ -72,23 +72,23 @@ def test_endpoint_projection_preserves_multiple_source_words_without_mixing_miss
     third = SourceWord(
         "w3", "z", "z", 1, accent_catalogued=True, accent_rank=2, accent_final=False
     )
-    _append_catalogue_features(features, 42, (first, second, third))
+    build._append_catalogue_features(features, 42, (first, second, third))
     assert features["cantillation_catalog_rank"][42] == "0 | 1 | 2"
     assert features["cantillation_catalog_final"][42] == "? | 1 | 0"
 
 
 def test_catalogue_endpoint_features_are_raw_source_strings():
     for feature in ("cantillation_catalog_rank", "cantillation_catalog_final"):
-        assert FEATURE_META[feature]["valueType"] == "str"
-        meta = _metadata("2021", "pinned-source")[feature]
+        assert build.FEATURE_META[feature]["valueType"] == "str"
+        meta = build._metadata("2021", "pinned-source")[feature]
         assert "MorphHB" in meta["description"]
         assert meta["source"].endswith("/pinned-source")
 
 
-def test_uncatalogued_manual_word_never_projects_invented_metadata():
+def test_uncatalogued_manual_word_never_projects_inventedbuild._metadata():
     features = {"cantillation_catalog_rank": {}, "cantillation_catalog_final": {}}
     bad = SourceWord("fallback", "x", "x", 1, accent_rank=9, accent_final=True)
-    _append_catalogue_features(features, 42, (bad,))
+    build._append_catalogue_features(features, 42, (bad,))
     assert features == {"cantillation_catalog_rank": {}, "cantillation_catalog_final": {}}
 
 
@@ -96,7 +96,7 @@ def test_projection_keeps_source_position_through_fallbacks():
     features = {"cantillation_catalog_rank": {}, "cantillation_catalog_final": {}}
     fallback = SourceWord("fb", "x", "x", 1)
     known = SourceWord("known", "y", "y", 1, accent_catalogued=True, accent_rank=3)
-    _append_catalogue_features(features, 7, (fallback, known))
+    build._append_catalogue_features(features, 7, (fallback, known))
     assert features["cantillation_catalog_rank"][7] == "? | 3"
     assert 7 not in features["cantillation_catalog_final"]
 
