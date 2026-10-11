@@ -53,10 +53,11 @@ Catalogue rank and `final` are taken directly from MorphHB's prose/poetic
 When the source catalogue omits `final`, the feature is absent (it is **not**
 interpreted as false). `1` represents an explicit true and `0` an explicit
 false. Both endpoint features have TF `valueType=str` to preserve multiword
-slot projections with ` | ` separators; absent source values are omitted,
-so those projected values are not guaranteed to have the same number of
-components as `cantillation_source_id`. For unambiguous word-level identity,
-consult the MorphHB source IDs and the original alignment report.
+slot projections with ` | ` separators. Missing values are omitted
+when every source word on the slot lacks that field; when some source words
+have a value, `?` preserves the missing positions so entries remain aligned
+with `cantillation_source_id`. For unambiguous word-level identity, consult
+the MorphHB source IDs and the original alignment report.
 
 ## Build
 
