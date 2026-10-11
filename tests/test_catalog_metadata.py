@@ -1,7 +1,5 @@
 """Contract tests for raw MorphHB catalogue metadata and endpoint projection."""
 
-from xml.etree import ElementTree as ET
-
 from bhsa_cantillation import build
 from bhsa_cantillation.model import SourceWord
 from bhsa_cantillation.morphhb import NS, parse_verse
@@ -24,6 +22,8 @@ CATALOG = {
 
 
 def parse_word(osis: str, text: str) -> SourceWord:
+    from xml.etree import ElementTree as ET
+
     xml = f'<verse xmlns="{NS[1:-1]}" osisID="{osis}"><w id="w1" n="0">{text}</w></verse>'
     return parse_verse(ET.fromstring(xml), CATALOG)[0]
 
