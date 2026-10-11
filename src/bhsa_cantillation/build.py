@@ -149,16 +149,31 @@ def _append_value(
 
 
 def _append_catalogue_features(
-    features: dict[str, dict[int, str | int]], endpoint: int, source: SourceWord
+    features: dict[str, dict[int, str | int]],
+    endpoint: int,
+    sources: tuple[SourceWord, ...],
 ) -> None:
-    """Project only explicitly catalogued rank/final fields to the last BHSA slot."""
-    if source.accent_catalogued:
-        if source.accent_rank is not None:
-            _append_value(features["cantillation_catalog_rank"], endpoint, source.accent_rank)
-        if source.accent_final is not None:
-            _append_value(
-                features["cantillation_catalog_final"], endpoint, "1" if source.accent_final else "0"
-            )
+    """Project metadata with positional placeholders for shared BHSA endpoints."""
+    if not sources:
+        return
+    ranks = [
+        str(source.accent_rank)
+        if source.accent_catalogued and source.accent_rank is not None
+        else "?"
+        for source in sources
+    ]
+    finals = [
+        ("1" if source.accent_final else "0")
+        if source.accent_catalogued and source.accent_final is not None
+        else "?"
+        for source in sources
+    ]
+    for feature, values in (
+        ("cantillation_catalog_rank", ranks),
+        ("cantillation_catalog_final", finals),
+    ):
+        if any(value != "?" for value in values):
+            features[feature][endpoint] = " | ".join(values)
 
 
 def _metadata(version: str, source_commit: str | None) -> dict:
@@ -255,13 +270,14 @@ def build_module(
             tree = build_tree(units)
             system = accent_system(osis_id)
 
+            endpoint_sources: dict[int, list[SourceWord]] = {}
             for alignment in word_alignments:
                 endpoint = alignment.slots[-1]
                 source = alignment.source
                 _append_value(features["cantillation_accent"], endpoint, source.accent_name)
                 _append_value(features["cantillation_accent_type"], endpoint, source.accent_type)
                 _append_value(features["cantillation_source_id"], endpoint, source.source_id)
-                _append_catalogue_features(features, endpoint, source)
+                endpoint_sources.setdefault(endpoint, []).append(source)
                 status = "catalogued" if source.accent_catalogued else "unicode-fallback"
                 _append_value(features["cantillation_accent_status"], endpoint, status)
                 if source.accent_marks:
@@ -273,6 +289,9 @@ def build_module(
                     fallback_patterns[
                         (system, source.accent_type, source.accent_marks, source.accent_name)
                     ] += 1
+
+            for endpoint, sources in endpoint_sources.items():
+                _append_catalogue_features(features, endpoint, tuple(sources))
 
             for unit in units:
                 for slot in unit.slots:
