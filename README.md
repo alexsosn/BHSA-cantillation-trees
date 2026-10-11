@@ -380,6 +380,37 @@ Atnach
 Add `--details` to show MorphHB paths and inclusive BHSA slot ranges, or
 `--unicode-lines` to use box-drawing connectors.
 
+## Canonical graph projection (experimental)
+
+The converter also provides a pure-Python representation of the existing
+MorphHB-derived graph, preserving distinct source words and accentual units
+when several of them map to the same BHSA word slot:
+
+```python
+from bhsa_cantillation.graph import project_graph, reconstruct_tree
+from bhsa_cantillation.tree import build_tree, make_units
+
+units = make_units(word_alignments)  # from the existing MorphHB/BHSA aligner
+tree = build_tree(units)
+graph = project_graph("Gen.1.1", word_alignments, units, tree)
+
+assert reconstruct_tree(graph) == tree
+root = graph.phrases[graph.root]
+cut_unit_id = graph.cuts[root.id]
+```
+
+The graph exposes `words`, `units`, `phrases` and the valued
+`parents` (child → parent, `1` or `2` in **textual order**),
+`cuts` (phrase → unit immediately before the split), and `terminals`
+(unit → source word closing the unit). Source-word IDs are MorphHB IDs;
+unit and phrase IDs encode the verse and unit span. Every node's `slots`
+is a deduplicated union of BHSA word slots without collapsing source identities.
+
+This API currently constructs in-memory graph objects. It does **not**
+install new Text-Fabric node types or `oslots` edges into the lightweight
+`tf/2021` feature module. A separate derived TF dataset materializer is
+planned, with ID and round-trip invariants before release.
+
 ## Provenance and licensing
 
 The conversion code is MIT licensed. Generated cantillation features are an
