@@ -39,6 +39,10 @@ accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 | `cantillation_longest_accent_run` | `verse` | Longest same-accent run on a root-to-leaf path |
 | `cantillation_depth_leaf_ratio` | `verse` | Maximum depth divided by leaf count |
 
+The two `cantillation_catalog_*` fields are available when rebuilding the module
+with this version of the converter. The checked-in `tf/2021` artifact was
+generated before they were added and must be regenerated to contain them.
+
 Because BHSA slots represent morphological words, an orthographic MorphHB word
 can correspond to several BHSA `word` nodes. Accent features are placed on the
 last matching BHSA slot. Unit features are copied to all slots belonging to the
