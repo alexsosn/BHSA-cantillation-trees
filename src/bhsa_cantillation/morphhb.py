@@ -117,12 +117,15 @@ def parse_verse(verse: ET.Element, catalog: dict) -> list[SourceWord]:
             # MorphHB stores rank as a decimal string and "final" as an optional
             # string flag. Missing final is not equivalent to explicit false.
             if "rank" in entry:
-                word.accent_rank = int(entry["rank"])
+                rank = entry["rank"]
+                if not isinstance(rank, str) or not rank.isdecimal():
+                    raise ValueError(f"Unexpected MorphHB accent rank: {rank!r}")
+                word.accent_rank = int(rank)
             if "final" in entry:
                 value = entry["final"]
-                if value in ("true", True):
+                if value == "true" or value is True:
                     word.accent_final = True
-                elif value in ("false", False):
+                elif value == "false" or value is False:
                     word.accent_final = False
                 else:
                     raise ValueError(f"Unexpected MorphHB accent final flag: {value!r}")
