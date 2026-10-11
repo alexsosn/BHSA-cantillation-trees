@@ -48,14 +48,14 @@ FEATURE_META = {
     "cantillation_catalog_rank": {
         "description": (
             "raw MorphHB AccentCatalog.js rank at orthographic-word endpoint; "
-            "missing values omitted, multiple source words separated by |"
+            "unknown values use ? when shared, source positions separated by |"
         ),
         "valueType": "str",
     },
     "cantillation_catalog_final": {
         "description": (
             "raw MorphHB AccentCatalog.js optional final flag, 1=true, 0=false; "
-            "missing is unknown/omitted, multiple source words separated by |"
+            "missing is unknown, ? preserves shared source positions separated by |"
         ),
         "valueType": "str",
     },
