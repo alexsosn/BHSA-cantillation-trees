@@ -72,10 +72,9 @@ def test_endpoint_projection_preserves_multiple_source_words_without_mixing_miss
     third = SourceWord(
         "w3", "z", "z", 1, accent_catalogued=True, accent_rank=2, accent_final=False
     )
-    for word in (first, second, third):
-        _append_catalogue_features(features, 42, word)
+    _append_catalogue_features(features, 42, (first, second, third))
     assert features["cantillation_catalog_rank"][42] == "0 | 1 | 2"
-    assert features["cantillation_catalog_final"][42] == "1 | 0"
+    assert features["cantillation_catalog_final"][42] == "? | 1 | 0"
 
 
 def test_catalogue_endpoint_features_are_raw_source_strings():
@@ -89,5 +88,14 @@ def test_catalogue_endpoint_features_are_raw_source_strings():
 def test_uncatalogued_manual_word_never_projects_invented_metadata():
     features = {"cantillation_catalog_rank": {}, "cantillation_catalog_final": {}}
     bad = SourceWord("fallback", "x", "x", 1, accent_rank=9, accent_final=True)
-    _append_catalogue_features(features, 42, bad)
+    _append_catalogue_features(features, 42, (bad,))
     assert features == {"cantillation_catalog_rank": {}, "cantillation_catalog_final": {}}
+
+
+def test_projection_keeps_source_position_through_fallbacks():
+    features = {"cantillation_catalog_rank": {}, "cantillation_catalog_final": {}}
+    fallback = SourceWord("fb", "x", "x", 1)
+    known = SourceWord("known", "y", "y", 1, accent_catalogued=True, accent_rank=3)
+    _append_catalogue_features(features, 7, (fallback, known))
+    assert features["cantillation_catalog_rank"][7] == "? | 3"
+    assert 7 not in features["cantillation_catalog_final"]
