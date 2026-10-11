@@ -94,6 +94,9 @@ def project_graph(
             raise ValueError("Each unit requires source word identifiers")
         if any(source_id not in words for source_id in ids):
             raise ValueError("Unit references an unknown source word")
+        terminal = unit.source_words[-1]
+        if terminal.path != unit.path or terminal.accent_name != unit.accent_name:
+            raise ValueError("Unit terminal source word disagrees with unit path or accent")
         expected_slots = _union_slots(*(words[source_id].slots for source_id in ids))
         if expected_slots != unit.slots:
             raise ValueError("Unit slots differ from source word slots")
