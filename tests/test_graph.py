@@ -113,3 +113,25 @@ def test_nonbinary_internal_node_is_rejected():
     tree["children"] = [tree["children"][0]]
     with pytest.raises(ValueError, match="binary"):
         project_graph("Gen.1.1", alignments, units, tree)
+
+
+def test_terminal_source_word_must_supply_unit_path_and_accent():
+    alignments, units, tree = genesis_fixture()
+    alignments[2].source.path = "WRONG"
+    with pytest.raises(ValueError, match="terminal"):
+        project_graph("Gen.1.1", alignments, units, tree)
+    alignments[2].source.path = "1"
+    alignments[2].source.accent_name = "WRONG"
+    with pytest.raises(ValueError, match="terminal"):
+        project_graph("Gen.1.1", alignments, units, tree)
+
+
+def test_graph_phrase_ids_are_unique_and_root_depth_is_zero():
+    alignments, units, tree = genesis_fixture()
+    graph = project_graph("Gen.1.1", alignments, units, tree)
+    assert set(graph.phrases) == {
+        "Gen.1.1#p1-2", "Gen.1.1#p3-4", "Gen.1.1#p1-4"
+    }
+    assert graph.phrases[graph.root].depth == 0
+    assert graph.phrases["Gen.1.1#p1-2"].depth == 1
+    assert graph.phrases["Gen.1.1#p3-4"].depth == 1
