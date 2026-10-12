@@ -158,6 +158,35 @@ def test_duplicate_parent_or_missing_child_is_rejected(graph_path):
         list(iter_boundary_rows(load_boundary_api(graph_path)))
 
 
+
+def test_forged_membership_cannot_change_source_word_provenance(graph_path):
+    tf = pytest.importorskip("tf.fabric")
+    # A source word moved to another unit while stored unit/phrase counts remain intact.
+    assert tf.Fabric(locations=str(graph_path), silent="deep").save(
+        edgeFeatures={"cant_member": {
+            13: {9}, 14: {9}, 15: {11}, 16: {12},
+        }},
+        metaData={"cant_member": {"valueType": "str"}},
+        silent="deep",
+    )
+    with pytest.raises(ValueError, match="member"):
+        list(iter_boundary_rows(load_boundary_api(graph_path)))
+
+
+def test_invalid_graph_keeps_prior_export_untouched(graph_path, tmp_path):
+    tf = pytest.importorskip("tf.fabric")
+    output = tmp_path / "prior.jsonl"
+    output.write_bytes(b"prior valid export\\n")
+    assert tf.Fabric(locations=str(graph_path), silent="deep").save(
+        edgeFeatures={"cant_cut_after": {7: {10}}},
+        metaData={"cant_cut_after": {"valueType": "str"}},
+        silent="deep",
+    )
+    with pytest.raises(ValueError, match="cut"):
+        main(["boundaries", "--graph", str(graph_path), "--output", str(output)])
+    assert output.read_bytes() == b"prior valid export\\n"
+    assert not list(tmp_path.glob(".prior.jsonl.*.tmp"))
+
 def test_cli_jsonl_tsv_are_deterministic_and_share_schema(graph_path, tmp_path):
     json_path = tmp_path / "boundaries.jsonl"
     tsv_path = tmp_path / "boundaries.tsv"
