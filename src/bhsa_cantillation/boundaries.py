@@ -49,6 +49,7 @@ REQUIRED_FEATURES = (
     "cant_parent",
     "cant_cut_after",
     "cant_terminal",
+    "cant_member",
     "cant_root",
     "cant_phrase_id",
     "cant_phrase_depth",
@@ -63,6 +64,7 @@ REQUIRED_FEATURES = (
     "cant_unit_word_count",
     "cant_terminal_accent",
     "cant_word_id",
+    "cant_word_ordinal",
     "cantillation_system",
     "cantillation_alignment",
 )
@@ -114,6 +116,11 @@ def iter_boundary_rows(api) -> Iterator[dict]:
         raise ValueError("Graph cut edge sources differ from cantillation phrases")
     if set(E.cant_terminal.data) != units:
         raise ValueError("Graph terminal edge sources differ from cantillation units")
+    if set(E.cant_member.data) != words or any(
+        len(targets) != 1 or next(iter(targets)) not in units
+        for targets in E.cant_member.data.values()
+    ):
+        raise ValueError("Graph source word membership is incomplete or duplicated")
 
     children: dict[int, dict[int, int]] = {}
     parents: dict[int, int] = {}
@@ -136,6 +143,7 @@ def iter_boundary_rows(api) -> Iterator[dict]:
         or "https://github.com/openscriptures/morphhb"
     )
     visited: set[int] = set()
+    seen_words: set[int] = set()
     roots: set[int] = set()
 
     def per_verse(verse: int, root: int) -> Iterator[dict]:
@@ -145,6 +153,7 @@ def iter_boundary_rows(api) -> Iterator[dict]:
             raise ValueError(f"Missing or invalid verse source metadata at {verse}")
 
         sizes: dict[int, int] = {}
+        word_orders: dict[int, tuple[int, ...]] = {}
         records: list[dict] = []
         verse_id: str | None = None
 
@@ -178,7 +187,27 @@ def iter_boundary_rows(api) -> Iterator[dict]:
                     or not F.cant_word_id.v(terminal[0])
                 ):
                     raise ValueError(f"Missing source terminal at unit {node}")
+                members = E.cant_member.t(node)
+                if (
+                    len(members) != count
+                    or len(set(members)) != count
+                    or any(member not in words or member in seen_words for member in members)
+                ):
+                    raise ValueError(f"Forged or missing source word membership at unit {node}")
+                positions = [(F.cant_word_ordinal.v(member), member) for member in members]
+                if any(type(position) is not int or position < 1 for position, _ in positions):
+                    raise ValueError(f"Invalid source word ordinal in unit {node}")
+                positions.sort()
+                first_word = positions[0][0]
+                if (
+                    [position for position, _ in positions]
+                    != list(range(first_word, first_word + count))
+                    or terminal[0] != positions[-1][1]
+                ):
+                    raise ValueError(f"Noncontiguous source member order at unit {node}")
                 sizes[ordinal] = count
+                word_orders[ordinal] = tuple(position for position, _ in positions)
+                seen_words.update(members)
                 return _Span(ordinal, ordinal, node, node, 1, count, slots)
 
             if node not in phrases:
@@ -253,7 +282,10 @@ def iter_boundary_rows(api) -> Iterator[dict]:
             raise ValueError(f"Noncontiguous source unit order at verse {verse}")
         prefix = [0]
         for ordinal in range(1, span.units + 1):
-            prefix.append(prefix[-1] + sizes[ordinal])
+            end = prefix[-1] + sizes[ordinal]
+            if word_orders[ordinal] != tuple(range(prefix[-1] + 1, end + 1)):
+                raise ValueError(f"Source words are out of verse order at verse {verse}")
+            prefix.append(end)
         if prefix[-1] != span.words:
             raise ValueError(f"Source word count drift at verse {verse}")
         for row in sorted(
@@ -276,7 +308,7 @@ def iter_boundary_rows(api) -> Iterator[dict]:
 
         yield from per_verse(verse, root)
 
-    if visited != graph_nodes or set(parents) != graph_nodes - roots:
+    if visited != graph_nodes or seen_words != words or set(parents) != graph_nodes - roots:
         raise ValueError("Orphan or disconnected cantillation nodes in saved graph")
 
 
