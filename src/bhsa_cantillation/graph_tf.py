@@ -115,7 +115,9 @@ class GraphTFCollector:
                 "cant_word_text": word.text,
                 "cant_word_accent": source.accent_name,
                 "cant_word_role": source.accent_type,
-                "cant_word_status": "catalogued" if source.accent_catalogued else "unicode-fallback",
+                "cant_word_status": (
+                    "catalogued" if source.accent_catalogued else "unicode-fallback"
+                ),
             }
             if source.path is not None:
                 features["cant_word_path"] = source.path
