@@ -5,9 +5,9 @@ from pathlib import Path
 import pytest
 
 from bhsa_cantillation.cli import parser
+from bhsa_cantillation.graph import project_graph
 from bhsa_cantillation.graph_build import build_graph_dataset, check_graph_stats
 from bhsa_cantillation.graph_tf import GraphTFCollector
-from bhsa_cantillation.graph import project_graph
 from bhsa_cantillation.model import SourceWord, WordAlignment
 from bhsa_cantillation.tree import build_tree, make_units
 
