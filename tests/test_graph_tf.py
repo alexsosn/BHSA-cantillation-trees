@@ -5,7 +5,11 @@ from pathlib import Path
 import pytest
 
 from bhsa_cantillation.graph import project_graph
-from bhsa_cantillation.graph_tf import GraphTFCollector, materialize_graph_types
+from bhsa_cantillation.graph_tf import (
+    GraphTFCollector,
+    materialize_graph_types,
+    verify_graph_dataset,
+)
 from bhsa_cantillation.model import SourceWord, WordAlignment
 from bhsa_cantillation.tree import build_tree, make_units
 
@@ -173,3 +177,31 @@ def test_toy_text_fabric_modify_append_and_reloaded_cross_type_edges(tmp_path):
     assert api.E.cant_terminal.f(12) == (16,)
     assert api.E.cant_member.f(16) == (12,)
     assert api.E.cant_root.f(5) == (7,)
+
+
+def test_loaded_graph_reconstructs_original_json_and_rejects_corrupted_edge(tmp_path):
+    tf = pytest.importorskip("tf.fabric")
+    core = tmp_path / "core"
+    target = tmp_path / "derived"
+    core.mkdir()
+    assert tf.Fabric(locations=str(core), silent="deep").save(
+        nodeFeatures={"otype": {1: "word", 2: "word", 3: "word", 4: "word", 5: "verse"}},
+        edgeFeatures={"oslots": {5: {1, 2, 3, 4}}},
+        metaData={"otype": {"valueType": "str"}, "oslots": {"valueType": "str"}},
+        silent="deep",
+    )
+    alignments, graph = sample()
+    collector = GraphTFCollector(base_max_node=5, max_slot=4)
+    collector.append(5, graph, alignments)
+    batch = collector.finalize()
+    materialize_graph_types(core, target, batch)
+    original = build_tree(make_units(alignments))
+    verify_graph_dataset(core, target, batch, {5: original})
+    # Tamper with the serialized result, not the in-memory source graph.
+    assert tf.Fabric(locations=str(target), silent="deep").save(
+        edgeFeatures={"cant_cut_after": {7: {9}}},
+        metaData={"cant_cut_after": {"valueType": "str"}},
+        silent="deep",
+    )
+    with pytest.raises(ValueError, match="cant_cut_after"):
+        verify_graph_dataset(core, target, batch, {5: original})
