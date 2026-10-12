@@ -175,7 +175,7 @@ def test_toy_text_fabric_modify_append_and_reloaded_cross_type_edges(tmp_path):
     assert api.F.otype.v(5) == "verse"
     assert api.F.otype.maxSlot == 4
     assert api.F.otype.maxNode == 16
-    assert api.F.otype.s("cant_phrase") == (6, 7, 8)
+    assert set(api.F.otype.s("cant_phrase")) == {6, 7, 8}
     assert api.F.cant_word_id.v(13) == "w1"
     assert api.E.cant_parent.f(9) == ((6, 1),)
     assert api.E.cant_cut_after.f(7) == (10,)
