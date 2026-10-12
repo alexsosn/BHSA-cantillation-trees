@@ -182,6 +182,8 @@ def test_toy_text_fabric_modify_append_and_reloaded_cross_type_edges(tmp_path):
     assert api.E.cant_terminal.f(12) == (16,)
     assert api.E.cant_member.f(16) == (12,)
     assert api.E.cant_root.f(5) == (7,)
+    assert api.TF.features["cant_word_id"].metaData["license"] == "CC BY 4.0"
+    assert api.TF.features["cant_parent"].metaData["license"] == "CC BY 4.0"
 
 
 def test_loaded_graph_reconstructs_original_json_and_rejects_corrupted_edge(tmp_path):
