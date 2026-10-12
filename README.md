@@ -17,6 +17,8 @@ accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 | `cantillation_accent_type` | `word` | `conjunctive` or `disjunctive` |
 | `cantillation_marks` | `word` | Raw Unicode cantillation sequence |
 | `cantillation_accent_status` | `word` | `catalogued` or `unicode-fallback` |
+| `cantillation_catalog_rank` | `word` | Original MorphHB catalogue rank (decimal string) |
+| `cantillation_catalog_final` | `word` | Explicit MorphHB catalogue `final` flag (`1` or `0`) |
 | `cantillation_source_id` | `word` | MorphHB word identifier |
 | `cantillation_path` | `word` | MorphHB structural path on a unit-final word |
 | `cantillation_unit` | `word` | Accentual-unit number within the verse |
@@ -37,6 +39,10 @@ accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 | `cantillation_longest_accent_run` | `verse` | Longest same-accent run on a root-to-leaf path |
 | `cantillation_depth_leaf_ratio` | `verse` | Maximum depth divided by leaf count |
 
+The two `cantillation_catalog_*` fields are available when rebuilding the module
+with this version of the converter. The checked-in `tf/2021` artifact was
+generated before they were added and must be regenerated to contain them.
+
 Because BHSA slots represent morphological words, an orthographic MorphHB word
 can correspond to several BHSA `word` nodes. Accent features are placed on the
 last matching BHSA slot. Unit features are copied to all slots belonging to the
@@ -45,6 +51,17 @@ accentual unit.
 At the few places where one BHSA slot crosses a MorphHB word or unit boundary,
 all values are retained in source order and separated by ` | `. The JSON tree
 remains unambiguous because its leaves preserve the individual source units.
+
+Catalogue rank and `final` are taken directly from MorphHB's prose/poetic
+`AccentCatalog.js`, with no inferred values for unlisted accent combinations.
+When the source catalogue omits `final`, the feature is absent (it is **not**
+interpreted as false). `1` represents an explicit true and `0` an explicit
+false. Both endpoint features have TF `valueType=str` to preserve multiword
+slot projections with ` | ` separators. Missing values are omitted
+when every source word on the slot lacks that field; when some source words
+have a value, `?` preserves the missing positions so entries remain aligned
+with `cantillation_source_id`. For unambiguous word-level identity, consult
+the MorphHB source IDs and the original alignment report.
 
 ## Build
 

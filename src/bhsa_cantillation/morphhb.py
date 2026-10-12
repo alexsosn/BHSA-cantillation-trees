@@ -111,9 +111,24 @@ def parse_verse(verse: ET.Element, catalog: dict) -> list[SourceWord]:
         word.accent_type = "disjunctive" if word.path is not None else "conjunctive"
         word.accent_marks = extract_marks(word.accent_text + word.trailing)
         entry = _accent_entry(catalog, system, word.accent_type, word.accent_marks)
-        if entry:
+        if entry is not None:
             word.accent_name = entry["name"]
             word.accent_catalogued = True
+            # MorphHB stores rank as a decimal string and "final" as an optional
+            # string flag. Missing final is not equivalent to explicit false.
+            if "rank" in entry:
+                rank = entry["rank"]
+                if not isinstance(rank, str) or not rank.isdecimal():
+                    raise ValueError(f"Unexpected MorphHB accent rank: {rank!r}")
+                word.accent_rank = int(rank)
+            if "final" in entry:
+                value = entry["final"]
+                if value == "true" or value is True:
+                    word.accent_final = True
+                elif value == "false" or value is False:
+                    word.accent_final = False
+                else:
+                    raise ValueError(f"Unexpected MorphHB accent final flag: {value!r}")
         else:
             names = [unicodedata.name(char, f"U+{ord(char):04X}") for char in word.accent_marks]
             word.accent_name = " + ".join(names) if names else "None"

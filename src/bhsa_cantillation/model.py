@@ -16,6 +16,8 @@ class SourceWord:
     accent_type: str = "conjunctive"
     accent_name: str = ""
     accent_catalogued: bool = False
+    accent_rank: int | None = None
+    accent_final: bool | None = None
 
 
 @dataclass(frozen=True)
