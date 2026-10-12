@@ -277,9 +277,14 @@ def test_original_bhsa_oslots_changes_are_detected_after_materialization(tmp_pat
     derived = tf.Fabric(locations=str(target), silent="deep").load("", silent="deep")
     old_slots = {node: set(slots) for node, slots in derived.E.oslots.items()}
     old_slots[5] = {1, 2, 3}
+    node_types = {
+        node: derived.F.otype.v(node)
+        for node in range(1, derived.F.otype.maxNode + 1)
+    }
     assert tf.Fabric(locations=str(target), silent="deep").save(
+        nodeFeatures={"otype": node_types},
         edgeFeatures={"oslots": old_slots},
-        metaData={"oslots": {"valueType": "str"}},
+        metaData={"otype": {"valueType": "str"}, "oslots": {"valueType": "str"}},
         silent="deep",
     )
     with pytest.raises(ValueError, match="Original BHSA oslots"):
