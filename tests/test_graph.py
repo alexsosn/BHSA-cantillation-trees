@@ -85,7 +85,7 @@ def test_shared_slot_keeps_distinct_words_and_units_with_overlapping_oslots():
 def test_duplicate_or_missing_source_word_identity_is_rejected():
     alignments, units, tree = genesis_fixture()
     alignments[0].source.source_id = "g2"
-    with pytest.raises(ValueError, match="duplicate"):
+    with pytest.raises(ValueError, match="Duplicate"):
         project_graph("Gen.1.1", alignments, units, tree)
     alignments[0].source.source_id = ""
     with pytest.raises(ValueError, match="source"):
