@@ -54,6 +54,11 @@ def check_graph_stats(
             raise ValueError(f"Graph {name} edge count differs from expected source data")
 
 
+def required_graph_features() -> tuple[str, ...]:
+    """Preload all published module features before copying them into derived TF."""
+    return ("book", "chapter", "verse", "g_cons_utf8", *FEATURE_META)
+
+
 def build_graph_dataset(
     bhsa_path: Path,
     module_path: Path,
@@ -79,9 +84,7 @@ def build_graph_dataset(
             raise FileNotFoundError(f"{label} is missing: {path}")
 
     fabric = Fabric(locations=[str(bhsa_path), str(module_path)], silent="deep")
-    feature_list = (
-        "book chapter verse g_cons_utf8 cantillation_tree cantillation_source_id"
-    )
+    feature_list = " ".join(required_graph_features())
     api = fabric.load(feature_list, silent="deep")
     if api is None:
         raise RuntimeError("Cannot load pinned BHSA and the lightweight cantillation module")
