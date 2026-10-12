@@ -30,6 +30,13 @@ def parser() -> argparse.ArgumentParser:
     graph.add_argument("--output", type=Path, required=True)
     graph.add_argument("--source-commit")
     graph.add_argument("--max-verse-distance", type=int, default=12)
+
+    boundaries = commands.add_parser(
+        "boundaries", help="export persisted cantillation phrase cuts as JSONL or TSV"
+    )
+    boundaries.add_argument("--graph", type=Path, required=True, help="derived graph TF directory")
+    boundaries.add_argument("--format", choices=("jsonl", "tsv"), default="jsonl")
+    boundaries.add_argument("--output", type=Path, required=True)
     return root
 
 
@@ -58,6 +65,14 @@ def main(argv: list[str] | None = None) -> int:
             max_verse_distance=args.max_verse_distance,
         )
         print(json.dumps(asdict(stats), indent=2))
+        return 0
+    if args.command == "boundaries":
+        from .boundaries import load_boundary_api, write_boundary_rows
+
+        count = write_boundary_rows(
+            load_boundary_api(args.graph), args.output, fmt=args.format
+        )
+        print(json.dumps({"boundaries": count, "output": str(args.output)}, sort_keys=True))
         return 0
     return 2
 
