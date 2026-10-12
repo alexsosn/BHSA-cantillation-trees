@@ -1,0 +1,80 @@
+name: canonical-graph-integration
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/canonical-graph.yml"
+      - "src/bhsa_cantillation/graph*.py"
+      - "src/bhsa_cantillation/cli.py"
+      - "tests/test_graph*.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: canonical-graph-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e '.[dev]'
+      - run: python -m ruff check .
+      - run: python -m pytest
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ETCBC/bhsa
+          ref: 4db00e2157915495e1a4d3d57e41223df24775da
+          path: inputs/bhsa
+          sparse-checkout: tf/2021
+          filter: blob:none
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: openscriptures/morphhb
+          ref: 3d15126fb1ef74867fc1434be1942e837932691f
+          path: inputs/morphhb
+          sparse-checkout: |
+            wlc
+            structure/OshbVerse/Script
+          filter: blob:none
+          persist-credentials: false
+
+      - name: Build full derived cantillation graph and verify all 23,213 trees
+        run: |
+          bhsa-cantillation build-graph \
+            --bhsa inputs/bhsa/tf/2021 \
+            --module tf/2021 \
+            --morphhb inputs/morphhb \
+            --output build/canonical-graph/2021 \
+            --source-commit 3d15126fb1ef74867fc1434be1942e837932691f
+
+      - name: Assert pinned node counts and stable BHSA IDs
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("build/canonical-graph/2021/graph-build-stats.json")
+          stats = json.loads(path.read_text(encoding="utf-8"))
+          assert stats == {
+              "verses": 23213,
+              "source_words": 305507,
+              "units": 165747,
+              "phrases": 142534,
+              "fuzzy_verses": 10,
+              "original_max_node": 1446831,
+              "derived_max_node": 2060619,
+          }, stats
+          print("Verified complete graph:", stats)
+          PY
+          du -sh build/canonical-graph/2021
