@@ -11,9 +11,9 @@ import csv
 import json
 import os
 import tempfile
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
 
 BOUNDARY_FIELDS = (
     "verse_node",
@@ -264,7 +264,9 @@ def iter_boundary_rows(api) -> Iterator[dict]:
             prefix.append(prefix[-1] + sizes[ordinal])
         if prefix[-1] != span.words:
             raise ValueError(f"Source word count drift at verse {verse}")
-        for row in sorted(records, key=lambda r: (r["first_unit"], r["last_unit"], r["phrase_node"])):
+        for row in sorted(
+            records, key=lambda r: (r["first_unit"], r["last_unit"], r["phrase_node"])
+        ):
             row["cut_after_word_index"] = prefix[row["cut_after_unit"]]
             row["phrase_first_word_index"] = prefix[row["first_unit"] - 1] + 1
             row["phrase_last_word_index"] = prefix[row["last_unit"]]
@@ -292,7 +294,8 @@ def write_boundary_rows(api, output: Path, *, fmt: str = "jsonl") -> int:
                 writer.writeheader()
             for record in iter_boundary_rows(api):
                 if fmt == "jsonl":
-                    handle.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
+                    line = json.dumps(record, ensure_ascii=False, separators=(",", ":"))
+                    handle.write(line + "\n")
                 else:
                     writer.writerow(record)
                 count += 1
