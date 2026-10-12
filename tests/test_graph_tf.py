@@ -60,7 +60,10 @@ def test_add_types_are_deterministic_appended_and_preserve_word_slot_overlaps():
         assert spec["nodeFrom"] == 1
         assert spec["nodeTo"] == batch.counts[node_type]
         assert len(spec["nodeSlots"]) == batch.counts[node_type]
-        assert all(slots and all(1 <= slot <= 10 for slot in slots) for slots in spec["nodeSlots"].values())
+        assert all(
+            slots and all(1 <= slot <= 10 for slot in slots)
+            for slots in spec["nodeSlots"].values()
+        )
     assert batch.add_types["cant_word"]["nodeSlots"] == {
         1: {1}, 2: {2}, 3: {3}, 4: {4}
     }
