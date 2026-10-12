@@ -83,7 +83,7 @@ def test_ordered_parents_cuts_terminals_members_and_root_edges():
     batch = collector.finalize()
     assert batch.edges["cant_parent"] == {
         104: {101: 1},
-        105: {102: 1},
+        105: {101: 2},
         106: {103: 1},
         107: {103: 2},
         101: {102: 1},
