@@ -6,7 +6,12 @@ import pytest
 
 from bhsa_cantillation.cli import parser
 from bhsa_cantillation.graph import project_graph
-from bhsa_cantillation.graph_build import build_graph_dataset, check_graph_stats
+from bhsa_cantillation.build import FEATURE_META
+from bhsa_cantillation.graph_build import (
+    build_graph_dataset,
+    check_graph_stats,
+    required_graph_features,
+)
 from bhsa_cantillation.graph_tf import GraphTFCollector
 from bhsa_cantillation.model import SourceWord, WordAlignment
 from bhsa_cantillation.tree import build_tree, make_units
@@ -49,3 +54,9 @@ def test_graph_build_never_overwrites_existing_dataset(tmp_path):
     (output / "otype.tf").write_text("existing", encoding="utf-8")
     with pytest.raises(ValueError, match="empty"):
         build_graph_dataset(bhsa, module, morphhb, output)
+
+
+def test_build_graph_preloads_every_published_cantillation_feature_before_copy():
+    loaded = set(required_graph_features())
+    assert set(FEATURE_META).issubset(loaded)
+    assert {"book", "chapter", "verse", "g_cons_utf8"} <= loaded
