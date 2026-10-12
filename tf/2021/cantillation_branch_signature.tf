@@ -10,7 +10,7 @@
 @valueType=str
 @version=2021
 @writtenBy=Text-Fabric
-@dateWritten=2026-10-12T12:28:41+00:00Z
+@dateWritten=2026-10-12T14:28:05+00:00Z
 
 1414389	Atnach(Tipcha(L,L),Tipcha(L,L))
 Atnach(Zaqef_Qatan(Revia(L,Pashta(L,L)),Tipcha(L,L)),Zaqef_Qatan(L,Tipcha(L,L)))
