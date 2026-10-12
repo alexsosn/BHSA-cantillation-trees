@@ -208,3 +208,13 @@ def test_loaded_graph_reconstructs_original_json_and_rejects_corrupted_edge(tmp_
     )
     with pytest.raises(ValueError, match="cant_cut_after"):
         verify_graph_dataset(core, target, batch, {5: original})
+
+
+def test_distinct_verses_must_not_reuse_global_morphhb_source_identifiers():
+    first_words, first = sample("Gen.1.1")
+    next_words, second = sample("Gen.1.2")
+    collector = GraphTFCollector(base_max_node=100, max_slot=10)
+    collector.append(80, first, first_words)
+    with pytest.raises(ValueError, match="duplicate source"):
+        collector.append(81, second, next_words)
+    assert collector.finalize().counts["cant_word"] == 4
