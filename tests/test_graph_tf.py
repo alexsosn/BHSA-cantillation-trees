@@ -155,7 +155,11 @@ def test_toy_text_fabric_modify_append_and_reloaded_cross_type_edges(tmp_path):
             "otype": {1: "word", 2: "word", 3: "word", 4: "word", 5: "verse"},
         },
         edgeFeatures={"oslots": {5: {1, 2, 3, 4}}},
-        metaData={"otype": {"valueType": "str"}, "oslots": {"valueType": "str"}},
+        metaData={
+            "otype": {"valueType": "str"},
+            "oslots": {"valueType": "str"},
+            "otext": {"description": "minimal TF core for graph materialization tests"},
+        },
         silent="deep",
     )
     assert saved
@@ -190,7 +194,11 @@ def test_loaded_graph_reconstructs_original_json_and_rejects_corrupted_edge(tmp_
     assert tf.Fabric(locations=str(core), silent="deep").save(
         nodeFeatures={"otype": {1: "word", 2: "word", 3: "word", 4: "word", 5: "verse"}},
         edgeFeatures={"oslots": {5: {1, 2, 3, 4}}},
-        metaData={"otype": {"valueType": "str"}, "oslots": {"valueType": "str"}},
+        metaData={
+            "otype": {"valueType": "str"},
+            "oslots": {"valueType": "str"},
+            "otext": {"description": "minimal TF core for graph materialization tests"},
+        },
         silent="deep",
     )
     alignments, graph = sample()
@@ -228,7 +236,11 @@ def test_singleton_toy_dataset_roundtrips_without_cant_phrase_or_parent_edges(tm
     assert tf.Fabric(locations=str(core), silent="deep").save(
         nodeFeatures={"otype": {1: "word", 2: "word", 3: "verse"}},
         edgeFeatures={"oslots": {3: {1, 2}}},
-        metaData={"otype": {"valueType": "str"}, "oslots": {"valueType": "str"}},
+        metaData={
+            "otype": {"valueType": "str"},
+            "oslots": {"valueType": "str"},
+            "otext": {"description": "minimal TF core for graph materialization tests"},
+        },
         silent="deep",
     )
     alignments = [source("a", 1, None, "Munnach"), source("b", 2, "0", "Sof Pasuq")]
