@@ -236,7 +236,14 @@ class GraphTFCollector:
         return GraphTFBatch(add_types, edges, ranges, counts)
 
 
-def materialize_graph_types(core: Path, target: Path, batch: GraphTFBatch) -> None:
+def materialize_graph_types(
+    core: Path,
+    target: Path,
+    batch: GraphTFBatch,
+    *,
+    extra_node_features: dict | None = None,
+    extra_feature_meta: dict | None = None,
+) -> None:
     """Save full derived TF dataset and cross-type graph edges in separate stages."""
     from tf.dataset import modify
     from tf.fabric import Fabric
@@ -251,8 +258,16 @@ def materialize_graph_types(core: Path, target: Path, batch: GraphTFBatch) -> No
         for name, values in spec["nodeFeatures"].items():
             sample = next(iter(values.values()))
             feature_meta[name] = {"valueType": "int" if type(sample) is int else "str"}
-    if not modify(str(core), str(target), addTypes=batch.add_types, featureMeta=feature_meta,
-                  silent="deep"):
+    if extra_feature_meta:
+        feature_meta.update(extra_feature_meta)
+    if not modify(
+        str(core),
+        str(target),
+        addTypes=batch.add_types,
+        addFeatures={"nodeFeatures": extra_node_features or {}},
+        featureMeta=feature_meta,
+        silent="deep",
+    ):
         raise RuntimeError("Text-Fabric modify(addTypes) failed for cantillation graph")
 
     edge_meta = {
@@ -265,3 +280,94 @@ def materialize_graph_types(core: Path, target: Path, batch: GraphTFBatch) -> No
         silent="deep",
     ):
         raise RuntimeError("Text-Fabric failed to save cantillation cross-type edges")
+
+
+def verify_graph_dataset(
+    core: Path,
+    target: Path,
+    batch: GraphTFBatch,
+    reference_trees: dict[int, dict],
+) -> None:
+    """Read committed TF warp/edges and reconstruct *all* original verse JSON trees."""
+    from tf.fabric import Fabric
+
+    original = Fabric(locations=str(core), silent="deep").load("", silent="deep")
+    names = {
+        name for spec in batch.add_types.values() for name in spec["nodeFeatures"]
+    }
+    names.update(name for name, entries in batch.edges.items() if entries)
+    derived = Fabric(locations=str(target), silent="deep").load(
+        " ".join(sorted(names)), silent="deep"
+    )
+    if original is None or derived is None:
+        raise RuntimeError("Could not reload original and cantillation graph TF datasets")
+    F, E = derived.F, derived.E
+    if (
+        F.otype.maxSlot != original.F.otype.maxSlot
+        or F.otype.maxNode != batch.max_node
+    ):
+        raise ValueError("Original BHSA slot IDs or total derived node range changed")
+    for node in range(1, batch.ranges["cant_phrase"][0]):
+        if F.otype.v(node) != original.F.otype.v(node):
+            raise ValueError(f"Original BHSA node {node} was renumbered or mutated")
+
+    for node_type, (first, last) in batch.ranges.items():
+        if tuple(F.otype.s(node_type)) != tuple(range(first, last + 1)):
+            raise ValueError(f"Wrong node range for {node_type}")
+        spec = batch.add_types[node_type]
+        for local, slots in spec["nodeSlots"].items():
+            real_node = first + local - 1
+            if set(E.oslots.f(real_node)) != slots:
+                raise ValueError(f"Wrong oslots for {node_type} node {real_node}")
+        for feature, values in spec["nodeFeatures"].items():
+            fn = derived.Fs(feature)
+            for local, expected in values.items():
+                if fn.v(first + local - 1) != expected:
+                    raise ValueError(f"Wrong {feature} for {node_type} node {local}")
+
+    # Compare loaded edge *data*, not the in-memory tree used to prepare edges.
+    for feature, expected in batch.edges.items():
+        if not expected:
+            continue
+        actual = derived.Es(feature).data
+        if set(actual) != set(expected):
+            raise ValueError(f"Wrong {feature} edge source set")
+        for node, neighbours in expected.items():
+            got = actual[node]
+            if feature == "cant_parent":
+                if dict(got) != neighbours:
+                    raise ValueError(f"Wrong {feature} valued edge at {node}")
+            elif set(got) != set(neighbours):
+                raise ValueError(f"Wrong {feature} edge at {node}")
+
+    children: dict[int, dict[int, int]] = {}
+    for child, parents in derived.E.cant_parent.data.items():
+        for parent, position in parents.items():
+            branch = children.setdefault(parent, {})
+            if position in branch:
+                raise ValueError("Duplicate numbered child in materialized TF graph")
+            branch[position] = child
+
+    def reconstruct(node: int) -> dict:
+        kind = F.otype.v(node)
+        if kind == "cant_unit":
+            slots = E.oslots.f(node)
+            return {
+                "path": F.cant_unit_path.v(node),
+                "slots": [min(slots), max(slots)],
+                "text": F.cant_unit_text.v(node),
+                "accent": F.cant_terminal_accent.v(node),
+            }
+        if kind != "cant_phrase" or set(children.get(node, {})) != {1, 2}:
+            raise ValueError("Materialized graph has nonbinary phrase structure")
+        return {
+            "accent": F.cant_cut_accent.v(node),
+            "children": [reconstruct(children[node][1]), reconstruct(children[node][2])],
+        }
+
+    if set(derived.E.cant_root.data) != set(reference_trees):
+        raise ValueError("Materialized graph root/verse set does not match source")
+    for verse, old_tree in reference_trees.items():
+        roots = E.cant_root.f(verse)
+        if len(roots) != 1 or reconstruct(roots[0]) != old_tree:
+            raise ValueError(f"Materialized TF graph does not round-trip verse {verse}")
