@@ -4,7 +4,6 @@ from bhsa_cantillation import build
 from bhsa_cantillation.model import SourceWord
 from bhsa_cantillation.morphhb import NS, parse_verse
 
-
 CATALOG = {
     "prose": {
         "conjunctive": {},
