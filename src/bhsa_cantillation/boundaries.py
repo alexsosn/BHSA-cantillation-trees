@@ -138,15 +138,7 @@ def iter_boundary_rows(api) -> Iterator[dict]:
     visited: set[int] = set()
     roots: set[int] = set()
 
-    for verse in sorted(verses):
-        edges = E.cant_root.f(verse)
-        if len(edges) != 1 or edges[0] not in graph_nodes:
-            raise ValueError(f"Missing or invalid root for verse {verse}")
-        root = edges[0]
-        if root in roots or root in parents:
-            raise ValueError(f"Duplicate, parented or shared root for verse {verse}")
-        roots.add(root)
-
+    def per_verse(verse: int, root: int) -> Iterator[dict]:
         system = F.cantillation_system.v(verse)
         alignment = F.cantillation_alignment.v(verse)
         if system not in ("prose", "poetic") or alignment not in ("exact", "fuzzy"):
@@ -271,6 +263,18 @@ def iter_boundary_rows(api) -> Iterator[dict]:
             row["phrase_first_word_index"] = prefix[row["first_unit"] - 1] + 1
             row["phrase_last_word_index"] = prefix[row["last_unit"]]
             yield row
+
+
+    for verse in sorted(verses):
+        edges = E.cant_root.f(verse)
+        if len(edges) != 1 or edges[0] not in graph_nodes:
+            raise ValueError(f"Missing or invalid root for verse {verse}")
+        root = edges[0]
+        if root in roots or root in parents:
+            raise ValueError(f"Duplicate, parented or shared root for verse {verse}")
+        roots.add(root)
+
+        yield from per_verse(verse, root)
 
     if visited != graph_nodes or set(parents) != graph_nodes - roots:
         raise ValueError("Orphan or disconnected cantillation nodes in saved graph")
