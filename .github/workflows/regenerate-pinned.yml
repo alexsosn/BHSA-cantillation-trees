@@ -1,0 +1,67 @@
+name: pinned-corpus-regeneration
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/regenerate-pinned.yml"
+      - "src/bhsa_cantillation/**"
+      - "tests/test_regeneration.py"
+      - "tests/test_generated_data.py"
+      - "tf/2021/cantillation_*.tf"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pinned-corpus-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e '.[dev]'
+      - run: python -m ruff check .
+      - run: python -m pytest
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ETCBC/bhsa
+          ref: 4db00e2157915495e1a4d3d57e41223df24775da
+          path: inputs/bhsa
+          sparse-checkout: tf/2021
+          filter: blob:none
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: openscriptures/morphhb
+          ref: 3d15126fb1ef74867fc1434be1942e837932691f
+          path: inputs/morphhb
+          sparse-checkout: |
+            wlc
+            structure/OshbVerse/Script
+          filter: blob:none
+          persist-credentials: false
+
+      - name: Rebuild against pinned 2021 sources
+        run: |
+          bhsa-cantillation build \
+            --bhsa inputs/bhsa/tf/2021 \
+            --morphhb inputs/morphhb \
+            --output build/generated/2021 \
+            --source-commit 3d15126fb1ef74867fc1434be1942e837932691f
+
+      - name: Verify checked-in data, all verses, and source provenance
+        run: |
+          python -m bhsa_cantillation.regeneration \
+            --reference tf/2021 \
+            --candidate build/generated/2021 \
+            --bhsa inputs/bhsa/tf/2021 \
+            --morphhb-sha 3d15126fb1ef74867fc1434be1942e837932691f
