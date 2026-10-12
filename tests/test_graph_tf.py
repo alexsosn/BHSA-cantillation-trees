@@ -218,3 +218,25 @@ def test_distinct_verses_must_not_reuse_global_morphhb_source_identifiers():
     with pytest.raises(ValueError, match="duplicate source"):
         collector.append(81, second, next_words)
     assert collector.finalize().counts["cant_word"] == 4
+
+
+def test_singleton_toy_dataset_roundtrips_without_cant_phrase_or_parent_edges(tmp_path):
+    tf = pytest.importorskip("tf.fabric")
+    core = tmp_path / "core"
+    target = tmp_path / "derived"
+    core.mkdir()
+    assert tf.Fabric(locations=str(core), silent="deep").save(
+        nodeFeatures={"otype": {1: "word", 2: "word", 3: "verse"}},
+        edgeFeatures={"oslots": {3: {1, 2}}},
+        metaData={"otype": {"valueType": "str"}, "oslots": {"valueType": "str"}},
+        silent="deep",
+    )
+    alignments = [source("a", 1, None, "Munnach"), source("b", 2, "0", "Sof Pasuq")]
+    units = make_units(alignments)
+    old_tree = build_tree(units)
+    graph = project_graph("Ps.117.1", alignments, units, old_tree)
+    collector = GraphTFCollector(base_max_node=3, max_slot=2)
+    collector.append(3, graph, alignments)
+    batch = collector.finalize()
+    materialize_graph_types(core, target, batch)
+    verify_graph_dataset(core, target, batch, {3: old_tree})
