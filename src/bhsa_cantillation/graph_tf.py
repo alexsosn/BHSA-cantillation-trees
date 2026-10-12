@@ -261,7 +261,11 @@ def materialize_graph_types(
     for spec in batch.add_types.values():
         for name, values in spec["nodeFeatures"].items():
             sample = next(iter(values.values()))
-            feature_meta[name] = {"valueType": "int" if type(sample) is int else "str"}
+            feature_meta[name] = {
+                "valueType": "int" if type(sample) is int else "str",
+                "license": "CC BY 4.0",
+                "provenance": "https://github.com/alexsosn/BHSA-cantillation-trees",
+            }
     if provenance:
         for metadata in feature_meta.values():
             metadata["source"] = provenance
@@ -282,6 +286,9 @@ def materialize_graph_types(
         else {"valueType": "str"}
         for name in EDGES
     }
+    for metadata in edge_meta.values():
+        metadata["license"] = "CC BY 4.0"
+        metadata["provenance"] = "https://github.com/alexsosn/BHSA-cantillation-trees"
     if provenance:
         for metadata in edge_meta.values():
             metadata["source"] = provenance
