@@ -187,6 +187,28 @@ def test_invalid_graph_keeps_prior_export_untouched(graph_path, tmp_path):
     assert output.read_bytes() == b"prior valid export\\n"
     assert not list(tmp_path.glob(".prior.jsonl.*.tmp"))
 
+
+def test_cross_verse_source_slot_forgery_is_rejected(tmp_path):
+    tf = pytest.importorskip("tf.fabric")
+    target = save_graph(tmp_path, singleton=True)
+    saved = tf.Fabric(locations=str(target), silent="deep").load("cant_root", silent="deep")
+    singleton_root = saved.E.cant_root.f(8)[0]
+    slots = {node: set(group) for node, group in saved.E.oslots.items()}
+    slots[singleton_root] = {1}  # BHSA slot 1 belongs to verse 7, not verse 8.
+    types = {
+        node: saved.F.otype.v(node)
+        for node in range(1, saved.F.otype.maxNode + 1)
+    }
+    assert tf.Fabric(locations=str(target), silent="deep").save(
+        nodeFeatures={"otype": types},
+        edgeFeatures={"oslots": slots},
+        metaData={"otype": {"valueType": "str"}, "oslots": {"valueType": "str"}},
+        silent="deep",
+    )
+    with pytest.raises(ValueError, match="slot|member"):
+        list(iter_boundary_rows(load_boundary_api(target)))
+
+
 def test_cli_jsonl_tsv_are_deterministic_and_share_schema(graph_path, tmp_path):
     json_path = tmp_path / "boundaries.jsonl"
     tsv_path = tmp_path / "boundaries.tsv"
