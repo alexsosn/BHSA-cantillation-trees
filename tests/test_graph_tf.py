@@ -250,3 +250,35 @@ def test_singleton_toy_dataset_roundtrips_without_cant_phrase_or_parent_edges(tm
     batch = collector.finalize()
     materialize_graph_types(core, target, batch)
     verify_graph_dataset(core, target, batch, {3: old_tree})
+
+
+def test_original_bhsa_oslots_changes_are_detected_after_materialization(tmp_path):
+    tf = pytest.importorskip("tf.fabric")
+    core, target = tmp_path / "core", tmp_path / "derived"
+    core.mkdir()
+    assert tf.Fabric(locations=str(core), silent="deep").save(
+        nodeFeatures={"otype": {1: "word", 2: "word", 3: "word", 4: "word", 5: "verse"}},
+        edgeFeatures={"oslots": {5: {1, 2, 3, 4}}},
+        metaData={
+            "otype": {"valueType": "str"},
+            "oslots": {"valueType": "str"},
+            "otext": {"description": "minimal TF core for graph materialization tests"},
+        },
+        silent="deep",
+    )
+    alignments, graph = sample()
+    collector = GraphTFCollector(base_max_node=5, max_slot=4)
+    collector.append(5, graph, alignments)
+    batch = collector.finalize()
+    materialize_graph_types(core, target, batch)
+
+    derived = tf.Fabric(locations=str(target), silent="deep").load("", silent="deep")
+    old_slots = {node: set(slots) for node, slots in derived.E.oslots.items()}
+    old_slots[5] = {1, 2, 3}
+    assert tf.Fabric(locations=str(target), silent="deep").save(
+        edgeFeatures={"oslots": old_slots},
+        metaData={"oslots": {"valueType": "str"}},
+        silent="deep",
+    )
+    with pytest.raises(ValueError, match="Original BHSA oslots"):
+        verify_graph_dataset(core, target, batch, {5: build_tree(make_units(alignments))})
