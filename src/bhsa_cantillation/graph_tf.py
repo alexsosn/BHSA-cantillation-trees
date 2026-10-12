@@ -278,7 +278,8 @@ def materialize_graph_types(
         raise RuntimeError("Text-Fabric modify(addTypes) failed for cantillation graph")
 
     edge_meta = {
-        name: {"edgeValues": True, "valueType": "int"} if name == "cant_parent" else {}
+        name: {"edgeValues": True, "valueType": "int"} if name == "cant_parent"
+        else {"valueType": "str"}
         for name in EDGES
     }
     if provenance:
@@ -322,12 +323,12 @@ def verify_graph_dataset(
             raise ValueError(f"Original BHSA node {node} was renumbered or mutated")
 
     for node_type, (first, last) in batch.ranges.items():
-        if tuple(F.otype.s(node_type)) != tuple(range(first, last + 1)):
+        if set(F.otype.s(node_type)) != set(range(first, last + 1)):
             raise ValueError(f"Wrong node range for {node_type}")
         spec = batch.add_types[node_type]
         for local, slots in spec["nodeSlots"].items():
             real_node = first + local - 1
-            if set(E.oslots.f(real_node)) != slots:
+            if set(E.oslots.s(real_node)) != slots:
                 raise ValueError(f"Wrong oslots for {node_type} node {real_node}")
         for feature, values in spec["nodeFeatures"].items():
             fn = derived.Fs(feature)
@@ -364,7 +365,7 @@ def verify_graph_dataset(
     def reconstruct(node: int) -> dict:
         kind = F.otype.v(node)
         if kind == "cant_unit":
-            slots = E.oslots.f(node)
+            slots = E.oslots.s(node)
             return {
                 "path": F.cant_unit_path.v(node),
                 "slots": [min(slots), max(slots)],
