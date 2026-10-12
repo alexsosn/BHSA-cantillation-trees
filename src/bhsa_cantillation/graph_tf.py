@@ -243,6 +243,7 @@ def materialize_graph_types(
     *,
     extra_node_features: dict | None = None,
     extra_feature_meta: dict | None = None,
+    provenance: str | None = None,
 ) -> None:
     """Save full derived TF dataset and cross-type graph edges in separate stages."""
     from tf.dataset import modify
@@ -258,6 +259,9 @@ def materialize_graph_types(
         for name, values in spec["nodeFeatures"].items():
             sample = next(iter(values.values()))
             feature_meta[name] = {"valueType": "int" if type(sample) is int else "str"}
+    if provenance:
+        for metadata in feature_meta.values():
+            metadata["source"] = provenance
     if extra_feature_meta:
         feature_meta.update(extra_feature_meta)
     if not modify(
@@ -274,6 +278,9 @@ def materialize_graph_types(
         name: {"edgeValues": True, "valueType": "int"} if name == "cant_parent" else {}
         for name in EDGES
     }
+    if provenance:
+        for metadata in edge_meta.values():
+            metadata["source"] = provenance
     if not Fabric(locations=str(target), silent="deep").save(
         edgeFeatures={name: values for name, values in batch.edges.items() if values},
         metaData=edge_meta,
