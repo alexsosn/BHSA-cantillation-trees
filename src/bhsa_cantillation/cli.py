@@ -20,6 +20,16 @@ def parser() -> argparse.ArgumentParser:
     build.add_argument("--version", default="2021")
     build.add_argument("--source-commit", help="MorphHB git commit recorded in metadata")
     build.add_argument("--max-verse-distance", type=int, default=12)
+
+    graph = commands.add_parser(
+        "build-graph", help="materialize a separate full BHSA+cantillation TF dataset"
+    )
+    graph.add_argument("--bhsa", type=Path, required=True)
+    graph.add_argument("--module", type=Path, required=True)
+    graph.add_argument("--morphhb", type=Path, required=True)
+    graph.add_argument("--output", type=Path, required=True)
+    graph.add_argument("--source-commit")
+    graph.add_argument("--max-verse-distance", type=int, default=12)
     return root
 
 
@@ -33,6 +43,19 @@ def main(argv: list[str] | None = None) -> int:
             version=args.version,
             max_verse_distance=args.max_verse_distance,
             source_commit=args.source_commit,
+        )
+        print(json.dumps(asdict(stats), indent=2))
+        return 0
+    if args.command == "build-graph":
+        from .graph_build import build_graph_dataset
+
+        stats = build_graph_dataset(
+            args.bhsa,
+            args.module,
+            args.morphhb,
+            args.output,
+            source_commit=args.source_commit,
+            max_verse_distance=args.max_verse_distance,
         )
         print(json.dumps(asdict(stats), indent=2))
         return 0
