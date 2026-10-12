@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
+from bhsa_cantillation.build import FEATURE_META
 from bhsa_cantillation.cli import parser
 from bhsa_cantillation.graph import project_graph
-from bhsa_cantillation.build import FEATURE_META
 from bhsa_cantillation.graph_build import (
     build_graph_dataset,
     check_graph_stats,
