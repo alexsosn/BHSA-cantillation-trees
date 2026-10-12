@@ -194,6 +194,11 @@ def iter_boundary_rows(api) -> Iterator[dict]:
                     or any(member not in words or member in seen_words for member in members)
                 ):
                     raise ValueError(f"Forged or missing source word membership at unit {node}")
+                member_slots = frozenset(
+                    slot for member in members for slot in E.oslots.s(member)
+                )
+                if member_slots != slots:
+                    raise ValueError(f"Source word member slots differ from unit slots: {node}")
                 positions = [(F.cant_word_ordinal.v(member), member) for member in members]
                 if any(type(position) is not int or position < 1 for position, _ in positions):
                     raise ValueError(f"Invalid source word ordinal in unit {node}")
@@ -278,6 +283,8 @@ def iter_boundary_rows(api) -> Iterator[dict]:
             )
 
         span = visit(root, 0)
+        if not span.slots <= frozenset(E.oslots.s(verse)):
+            raise ValueError(f"Cantillation source slots outside BHSA verse {verse}")
         if span.first != 1 or span.units != span.last or len(sizes) != span.units:
             raise ValueError(f"Noncontiguous source unit order at verse {verse}")
         prefix = [0]
