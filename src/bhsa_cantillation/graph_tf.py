@@ -352,7 +352,10 @@ def verify_graph_dataset(
                 raise ValueError(f"Wrong {feature} edge at {node}")
 
     children: dict[int, dict[int, int]] = {}
-    for child, parents in derived.E.cant_parent.data.items():
+    parent_edges = (
+        derived.Es("cant_parent").data if batch.edges["cant_parent"] else {}
+    )
+    for child, parents in parent_edges.items():
         for parent, position in parents.items():
             branch = children.setdefault(parent, {})
             if position in branch:
