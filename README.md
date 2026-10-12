@@ -452,10 +452,46 @@ The graph exposes `words`, `units`, `phrases` and the valued
 unit and phrase IDs encode the verse and unit span. Every node's `slots`
 is a deduplicated union of BHSA word slots without collapsing source identities.
 
-This API currently constructs in-memory graph objects. It does **not**
-install new Text-Fabric node types or `oslots` edges into the lightweight
-`tf/2021` feature module. A separate derived TF dataset materializer is
-planned, with ID and round-trip invariants before release.
+### Separate full Text-Fabric graph dataset
+
+The canonical graph can also be materialized as a **separate, full derived BHSA
+Text-Fabric dataset**. This leaves the lightweight `tf/2021` feature module
+and all original BHSA node IDs unchanged. It does **not** add warp nodes to
+the existing feature module.
+
+```bash
+bhsa-cantillation build-graph \
+  --bhsa /path/to/bhsa/tf/2021 \
+  --module tf/2021 \
+  --morphhb /path/to/pinned/morphhb \
+  --output build/canonical-graph/2021 \
+  --source-commit 3d15126fb1ef74867fc1434be1942e837932691f
+```
+
+Use MorphHB commit `3d15126fb1ef74867fc1434be1942e837932691f` and
+ETCBC/bhsa commit `4db00e2157915495e1a4d3d57e41223df24775da` for the
+pinned 2021 build. The output must be a new or empty directory; it is **not**
+committed into the lightweight module. Building a full BHSA copy requires
+substantial RAM and disk space.
+
+New node types: `cant_word` (source-word identity), `cant_unit` (accentual
+units), and `cant_phrase` (internal constituents). Graph edges are
+`cant_parent` (valued child→parent, 1/2 textual order),
+`cant_cut_after` (phrase→closing first-child unit),
+`cant_terminal` (unit→terminal word),
+`cant_member` (word→unit), and `cant_root` (original BHSA verse→root).
+Word, unit and phrase `oslots` preserve overlapping MorphHB/BHSA alignments.
+
+The build compares each source-derived verse tree with the pinned
+`cantillation_tree` JSON; reloads the full TF dataset; independently verifies
+all original `otype` node IDs, appended type ranges, feature values, slot
+unions and edge orientation; and reconstructs **every** verse tree from the
+saved graph. Workflow `canonical-graph-integration` performs this against
+both pinned source repositories.
+
+This is a derived dataset with BHSA's own licensing terms. A new release
+must keep the original BHSA and MorphHB attribution and should not be
+distributed as an ordinary feature-only `mod` directory.
 
 ## Provenance and licensing
 
