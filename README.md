@@ -45,9 +45,20 @@ accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 | `cantillation_longest_accent_run` | `verse` | Longest same-accent run on a root-to-leaf path |
 | `cantillation_depth_leaf_ratio` | `verse` | Maximum depth divided by leaf count |
 
-The `cantillation_catalog_*` and main-cut word-count fields are available when rebuilding
-with this version of the converter. The checked-in `tf/2021` artifact was
-generated before they were added and must be regenerated to contain them.
+The checked-in `tf/2021` artifact now includes the catalogue and root-cut
+features. It was regenerated against MorphHB commit
+`3d15126fb1ef74867fc1434be1942e837932691f` and the BHSA 2021
+dataset at ETCBC/bhsa commit `4db00e2157915495e1a4d3d57e41223df24775da`.
+The reproducibility gate compares all previously shipped TF feature data and
+the full alignment report against the original pinned build before copying
+only the eight new feature files.
+
+All 23,213 verses have `cantillation_word_count`; 23,202 verses have
+root-cut measurements, while the 11 single-unit verses have no root cut.
+The catalogue-rank feature projects 305,199 catalogued MorphHB source words
+onto 304,485 BHSA endpoint slots; the remaining 308 source words use the
+documented Unicode fallback. The original upstream catalogue has no explicit
+`final=false` entries: a missing final flag remains unknown.
 
 Because BHSA slots represent morphological words, an orthographic MorphHB word
 can correspond to several BHSA `word` nodes. Accent features are placed on the
