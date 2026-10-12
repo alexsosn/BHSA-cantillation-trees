@@ -1,7 +1,5 @@
 """Contract tests for Phase 3 Text-Fabric graph node/edge materialization."""
 
-from pathlib import Path
-
 import pytest
 
 from bhsa_cantillation.graph import project_graph
