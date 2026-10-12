@@ -31,6 +31,12 @@ accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 | `cantillation_accent_signature` | `verse` | Shape with internal and leaf accents |
 | `cantillation_depth` | `verse` | Maximum root-to-leaf depth in edges |
 | `cantillation_leaf_count` | `verse` | Number of accentual-unit leaves |
+| `cantillation_word_count` | `verse` | MorphHB orthographic source words |
+| `cantillation_main_cut_word_index` | `verse` | 1-based source-word index before the root cut |
+| `cantillation_main_first_word_count` | `verse` | Source words in the first root child |
+| `cantillation_main_second_word_count` | `verse` | Source words in the second root child |
+| `cantillation_main_cut_fraction` | `verse` | First-child words / total source words |
+| `cantillation_main_signed_split` | `verse` | (Second-child words - first-child words) / total |
 | `cantillation_mean_leaf_depth` | `verse` | Mean root-to-leaf depth |
 | `cantillation_colless` | `verse` | Colless imbalance index |
 | `cantillation_colless_normalized` | `verse` | Colless divided by its maximum for the leaf count |
@@ -39,7 +45,7 @@ accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 | `cantillation_longest_accent_run` | `verse` | Longest same-accent run on a root-to-leaf path |
 | `cantillation_depth_leaf_ratio` | `verse` | Maximum depth divided by leaf count |
 
-The two `cantillation_catalog_*` fields are available when rebuilding the module
+The `cantillation_catalog_*` and main-cut word-count fields are available when rebuilding
 with this version of the converter. The checked-in `tf/2021` artifact was
 generated before they were added and must be regenerated to contain them.
 
@@ -100,6 +106,18 @@ name assembled from Unicode character names. There are also 702 BHSA slots
 aligned to more than one MorphHB orthographic word and 26 slots belonging to
 more than one accentual unit. Their scalar feature values use the documented
 ` | ` separator.
+
+The six word-count/root-cut features count MorphHB `SourceWord` instances (one
+per directly parsed orthographic `<w>`), not BHSA word slots and not accentual units.
+A multiword *qere* attached to one *ketiv* `<w>` remains one source record
+in the existing parser; it is counted once rather than split on spaces.
+For the main cut, the first child of the root binary tree is the first textual
+span; its source-word count gives the inclusive word index before that cut.
+Fractions are rounded to six decimal places. The signed split is positive
+when the first span is shorter than the second, negative when it is longer,
+and zero when equal. Verses consisting of one accentual unit have
+`cantillation_word_count` but no defined root-cut features, so those five
+features are absent on their verse nodes.
 
 ## Load in Text-Fabric
 

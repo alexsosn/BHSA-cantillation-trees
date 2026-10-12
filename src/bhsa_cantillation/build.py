@@ -11,6 +11,7 @@ from tf.fabric import Fabric
 
 from .alignment import align_words
 from .books import BOOKS
+from .descriptors import main_cut_features
 from .metrics import tree_features
 from .model import SourceWord, WordAlignment
 from .morphhb import accent_system, load_accent_catalog, normalize_consonants, read_book
@@ -73,6 +74,36 @@ FEATURE_META = {
     },
     "cantillation_unit_path": {
         "description": "MorphHB structural path copied to every BHSA slot in the unit",
+        "valueType": "str",
+    },
+    "cantillation_word_count": {
+        "description": "number of MorphHB orthographic source words in the verse",
+        "valueType": "int",
+    },
+    "cantillation_main_cut_word_index": {
+        "description": (
+            "1-based MorphHB word index immediately before the root split; "
+            "absent when the verse has a single accentual unit"
+        ),
+        "valueType": "int",
+    },
+    "cantillation_main_first_word_count": {
+        "description": "MorphHB source words in the first textual child of the root cut",
+        "valueType": "int",
+    },
+    "cantillation_main_second_word_count": {
+        "description": "MorphHB source words in the second textual child of the root cut",
+        "valueType": "int",
+    },
+    "cantillation_main_cut_fraction": {
+        "description": "first root-child source words divided by total, up to six decimals",
+        "valueType": "str",
+    },
+    "cantillation_main_signed_split": {
+        "description": (
+            "(second root-child source words - first root-child source words) "
+            "divided by total, up to six decimals"
+        ),
         "valueType": "str",
     },
     "cantillation_system": {
@@ -304,6 +335,8 @@ def build_module(
             )
             features["cantillation_alignment"][verse_node] = result.status
             for feature, value in tree_features(tree).items():
+                features[feature][verse_node] = value
+            for feature, value in main_cut_features(units, tree).items():
                 features[feature][verse_node] = value
 
             verse_count += 1
