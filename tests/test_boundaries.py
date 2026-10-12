@@ -161,15 +161,24 @@ def test_duplicate_parent_or_missing_child_is_rejected(graph_path):
 def test_cli_jsonl_tsv_are_deterministic_and_share_schema(graph_path, tmp_path):
     json_path = tmp_path / "boundaries.jsonl"
     tsv_path = tmp_path / "boundaries.tsv"
-    args = ["boundaries", "--graph", str(graph_path), "--format", "jsonl", "--output", str(json_path)]
+    args = [
+        "boundaries", "--graph", str(graph_path), "--format", "jsonl",
+        "--output", str(json_path),
+    ]
     assert main(args) == 0
     original = json_path.read_bytes()
-    args = ["boundaries", "--graph", str(graph_path), "--format", "jsonl", "--output", str(json_path)]
+    args = [
+        "boundaries", "--graph", str(graph_path), "--format", "jsonl",
+        "--output", str(json_path),
+    ]
     assert main(args) == 0
     assert json_path.read_bytes() == original
     parsed = [json.loads(line) for line in original.decode("utf-8").splitlines()]
     assert len(parsed) == 3
-    args = ["boundaries", "--graph", str(graph_path), "--format", "tsv", "--output", str(tsv_path)]
+    args = [
+        "boundaries", "--graph", str(graph_path), "--format", "tsv",
+        "--output", str(tsv_path),
+    ]
     assert main(args) == 0
     with tsv_path.open(encoding="utf-8", newline="") as f:
         tsv_rows = list(csv.DictReader(f, delimiter="\t"))
