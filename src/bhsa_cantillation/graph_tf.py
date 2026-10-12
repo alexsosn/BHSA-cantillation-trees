@@ -307,7 +307,7 @@ def verify_graph_dataset(
         or F.otype.maxNode != batch.max_node
     ):
         raise ValueError("Original BHSA slot IDs or total derived node range changed")
-    for node in range(1, batch.ranges["cant_phrase"][0]):
+    for node in range(1, original.F.otype.maxNode + 1):
         if F.otype.v(node) != original.F.otype.v(node):
             raise ValueError(f"Original BHSA node {node} was renumbered or mutated")
 
