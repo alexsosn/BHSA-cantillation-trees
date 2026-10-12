@@ -50,7 +50,9 @@ def verify_module_files(reference: Path, candidate: Path, morphhb_sha: str) -> d
     if set(generated) != expected:
         missing = sorted(expected - set(generated))
         extra = sorted(set(generated) - expected)
-        raise ValueError(f"Generated TF feature inventory differs: missing={missing}, extra={extra}")
+        raise ValueError(
+            f"Generated TF feature inventory differs: missing={missing}, extra={extra}"
+        )
 
     target_source = f"https://github.com/openscriptures/morphhb/tree/{morphhb_sha}"
     for filename, file_path in generated.items():
