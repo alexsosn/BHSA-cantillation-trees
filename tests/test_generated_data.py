@@ -31,6 +31,14 @@ FEATURES = {
     "cantillation_mean_leaf_depth",
     "cantillation_sackin",
     "cantillation_shape",
+    "cantillation_catalog_rank",
+    "cantillation_catalog_final",
+    "cantillation_word_count",
+    "cantillation_main_cut_word_index",
+    "cantillation_main_first_word_count",
+    "cantillation_main_second_word_count",
+    "cantillation_main_cut_fraction",
+    "cantillation_main_signed_split",
 }
 
 
