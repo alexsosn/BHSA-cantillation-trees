@@ -72,7 +72,6 @@ class GraphTFCollector:
         ):
             raise ValueError("Graph source metadata differs from source alignments")
 
-        unit_ids = list(graph.units)
         all_ids = set(graph.units) | set(graph.phrases)
         if graph.root not in all_ids or graph.root in graph.parents:
             raise ValueError("Invalid graph root")
@@ -84,7 +83,7 @@ class GraphTFCollector:
         ):
             raise ValueError("Graph binary structure or terminal/cut edges are incomplete")
         child_places: dict[str, set[int]] = {}
-        for child_id, (parent_id, position) in graph.parents.items():
+        for _child_id, (parent_id, position) in graph.parents.items():
             if parent_id not in graph.phrases or position not in (1, 2):
                 raise ValueError("Invalid graph parent link")
             child_places.setdefault(parent_id, set()).add(position)
