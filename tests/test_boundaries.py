@@ -34,7 +34,7 @@ def source(name, slot, path, accent):
     )
 
 
-def four_units(slots=(1, 2, 3, 4)):
+def four_units(slots=(1, 2, 3, 4), skew=None):
     alignments = [
         source("w1", slots[0], "1.0", "Tipcha"),
         source("w2", slots[1], "1", "Atnach"),
@@ -42,7 +42,42 @@ def four_units(slots=(1, 2, 3, 4)):
         source("w4", slots[3], "0", "Sof Pasuq"),
     ]
     units = make_units(alignments)
-    return alignments, project_graph("Gen.1.1", alignments, units, build_tree(units))
+    tree = build_tree(units)
+    if skew is not None:
+        leaves = [
+            {
+                "path": unit.path,
+                "slots": [unit.slots[0], unit.slots[-1]],
+                "text": unit.text,
+                "accent": unit.accent_name,
+            }
+            for unit in units
+        ]
+        if skew == "left":
+            tree = {
+                "accent": units[2].accent_name,
+                "children": [
+                    {"accent": units[1].accent_name, "children": [
+                        {"accent": units[0].accent_name, "children": leaves[:2]},
+                        leaves[2],
+                    ]},
+                    leaves[3],
+                ],
+            }
+        elif skew == "right":
+            tree = {
+                "accent": units[0].accent_name,
+                "children": [
+                    leaves[0],
+                    {"accent": units[1].accent_name, "children": [
+                        leaves[1],
+                        {"accent": units[2].accent_name, "children": leaves[2:]},
+                    ]},
+                ],
+            }
+        else:
+            raise ValueError(f"Unexpected skew: {skew}")
+    return alignments, project_graph("Gen.1.1", alignments, units, tree)
 
 
 @pytest.fixture
@@ -50,7 +85,7 @@ def graph_path(tmp_path):
     return save_graph(tmp_path)
 
 
-def save_graph(tmp_path, *, slots=(1, 2, 3, 4), singleton=False):
+def save_graph(tmp_path, *, slots=(1, 2, 3, 4), singleton=False, skew=None):
     tf = pytest.importorskip("tf.fabric")
     core = tmp_path / "core"
     target = tmp_path / "derived"
@@ -75,7 +110,7 @@ def save_graph(tmp_path, *, slots=(1, 2, 3, 4), singleton=False):
         silent="deep",
     )
     collector = GraphTFCollector(base_max_node=base_max, max_slot=max_slot)
-    alignments, graph = four_units(slots)
+    alignments, graph = four_units(slots, skew=skew)
     collector.append(max_slot + 1, graph, alignments)
     if singleton:
         pair = [source("a", 5, None, "Munnach"), source("b", 6, "0", "Sof Pasuq")]
@@ -118,6 +153,23 @@ def test_export_canonical_textual_order_and_absolute_source_word_coordinates(gra
     assert rows[1]["alignment"] == "exact"
     assert rows[1]["cut_unit_id"] == "Gen.1.1#u2"
     assert rows[1]["cut_terminal_word_id"] == "w2"
+
+
+
+@pytest.mark.parametrize(
+    ("skew", "expected_split", "expected_first_words"),
+    [("left", -0.5, 3), ("right", 0.5, 1)],
+)
+def test_asymmetric_split_sign_and_root_cut_source_coordinates(
+    tmp_path, skew, expected_split, expected_first_words
+):
+    rows = list(iter_boundary_rows(load_boundary_api(save_graph(tmp_path, skew=skew))))
+    assert len(rows) == 3
+    root = next(row for row in rows if row["depth"] == 0)
+    assert root["signed_split"] == expected_split
+    assert root["first_child_word_count"] == expected_first_words
+    assert root["cut_after_word_index"] == expected_first_words
+    assert root["first_child_fraction"] == expected_first_words / 4
 
 
 def test_shared_bhsa_slots_do_not_reduce_source_word_counts(tmp_path):
