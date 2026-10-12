@@ -49,6 +49,7 @@ class GraphTFCollector:
         }
         self._verses: set[int] = set()
         self._osis_ids: set[str] = set()
+        self._source_ids: set[str] = set()
 
     def append(self, verse_node: int, graph: CantGraph, alignments: list[WordAlignment]) -> None:
         """Add a complete canonical verse without collapsing overlapping BHSA slots."""
@@ -60,6 +61,8 @@ class GraphTFCollector:
             raise ValueError("Cannot materialize an empty verse graph")
 
         words = list(graph.words.items())
+        if self._source_ids.intersection(graph.words):
+            raise ValueError("duplicate source identifier across MorphHB verses")
         if [a.source.source_id for a in alignments] != [w[0] for w in words]:
             raise ValueError("Graph source word order differs from source alignments")
         if not all(
@@ -192,6 +195,7 @@ class GraphTFCollector:
         self._links["cant_root"].append((verse_node, local_ids[graph.root], 0))
         self._verses.add(verse_node)
         self._osis_ids.add(graph.osis_id)
+        self._source_ids.update(graph.words)
 
     def finalize(self) -> GraphTFBatch:
         counts = {t: len(self._records[t]) for t in TYPES if self._records[t]}
