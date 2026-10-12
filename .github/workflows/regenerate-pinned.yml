@@ -49,7 +49,7 @@ jobs:
           path: inputs/morphhb
           sparse-checkout: |
             wlc
-            structure/OshbVerse/Script/AccentCatalog.js
+            structure/OshbVerse/Script
           filter: blob:none
           persist-credentials: false
 
