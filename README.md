@@ -160,6 +160,46 @@ defined as zero. `cantillation_longest_ladder` counts consecutive internal
 nodes where exactly one child is a leaf; `cantillation_longest_accent_run`
 includes both internal nodes and leaves.
 
+## Export saved cantillation boundaries
+
+Build the separate, fully verified derived TF graph with `bhsa-cantillation
+build-graph` (requires pinned BHSA, the checked-in module and MorphHB; see
+`.github/workflows/canonical-graph.yml`). Then export its internal phrase cuts:
+
+```bash
+bhsa-cantillation boundaries \
+  --graph build/canonical-graph/2021 \
+  --format jsonl --output boundaries.jsonl
+bhsa-cantillation boundaries \
+  --graph build/canonical-graph/2021 \
+  --format tsv --output boundaries.tsv
+```
+
+Each boundary corresponds to a persisted `cant_phrase` node; the exporter reads
+the saved `cant_parent`, `cant_cut_after`, `cant_terminal` and `cant_root`
+edges, rather than parsing and rebuilding a tree. Rows are ordered by numeric
+BHSA verse node, then `first_unit`, `last_unit` and phrase node. The 2021
+pinned graph contains **142,534** boundary rows across **23,202** verses; the
+11 single-unit verses have no cuts.
+
+`cut_after_word_index` is the inclusive **1-based MorphHB source-word index**
+from the start of the verse. `phrase_first_word_index` and
+`phrase_last_word_index` are also inclusive 1-based source-word coordinates.
+`first_child_word_count` and `second_child_word_count` count orthographic
+MorphHB source words; the corresponding `*_unit_count` columns count accentual
+units. `first_child_fraction` and `signed_split` are rounded to six decimal
+places. The split sign is `(second_child_word_count - first_child_word_count) /
+phrase_word_count`. `first_bhsa_slot`, `last_bhsa_slot` and
+`bhsa_slot_count` describe the BHSA slot projection, which can overlap across
+source words or units. They must not be used as source-word counts.
+
+The output also preserves `verse_node`, `osis_id`, `system`, `alignment`,
+`phrase_node`, `phrase_id`, `depth`, `cut_accent`, `cut_unit_id`,
+`cut_terminal_word_id`, and `source_uri`. JSONL encodes count/index fields
+as numbers; TSV uses a header and UTF-8 text. Both formats have fixed field
+order. The exporter rejects inconsistent or disconnected persisted graphs and
+replaces its output atomically only after every verse validates.
+
 ## Export and ASCII rendering
 
 Export the whole module as JSON Lines, or select verses into a JSON array:
