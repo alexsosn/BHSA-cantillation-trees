@@ -321,6 +321,10 @@ def verify_graph_dataset(
     for node in range(1, original.F.otype.maxNode + 1):
         if F.otype.v(node) != original.F.otype.v(node):
             raise ValueError(f"Original BHSA node {node} was renumbered or mutated")
+        if node > original.F.otype.maxSlot and set(E.oslots.s(node)) != set(
+            original.E.oslots.s(node)
+        ):
+            raise ValueError(f"Original BHSA oslots changed at node {node}")
 
     for node_type, (first, last) in batch.ranges.items():
         if set(F.otype.s(node_type)) != set(range(first, last + 1)):
