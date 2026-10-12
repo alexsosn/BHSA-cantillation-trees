@@ -8,8 +8,8 @@ import json
 
 import pytest
 
-from bhsa_cantillation.cli import main
 from bhsa_cantillation.boundaries import iter_boundary_rows, load_boundary_api
+from bhsa_cantillation.cli import main
 from bhsa_cantillation.graph import project_graph
 from bhsa_cantillation.graph_tf import GraphTFCollector, materialize_graph_types
 from bhsa_cantillation.model import SourceWord, WordAlignment
@@ -161,13 +161,16 @@ def test_duplicate_parent_or_missing_child_is_rejected(graph_path):
 def test_cli_jsonl_tsv_are_deterministic_and_share_schema(graph_path, tmp_path):
     json_path = tmp_path / "boundaries.jsonl"
     tsv_path = tmp_path / "boundaries.tsv"
-    assert main(["boundaries", "--graph", str(graph_path), "--format", "jsonl", "--output", str(json_path)]) == 0
+    args = ["boundaries", "--graph", str(graph_path), "--format", "jsonl", "--output", str(json_path)]
+    assert main(args) == 0
     original = json_path.read_bytes()
-    assert main(["boundaries", "--graph", str(graph_path), "--format", "jsonl", "--output", str(json_path)]) == 0
+    args = ["boundaries", "--graph", str(graph_path), "--format", "jsonl", "--output", str(json_path)]
+    assert main(args) == 0
     assert json_path.read_bytes() == original
     parsed = [json.loads(line) for line in original.decode("utf-8").splitlines()]
     assert len(parsed) == 3
-    assert main(["boundaries", "--graph", str(graph_path), "--format", "tsv", "--output", str(tsv_path)]) == 0
+    args = ["boundaries", "--graph", str(graph_path), "--format", "tsv", "--output", str(tsv_path)]
+    assert main(args) == 0
     with tsv_path.open(encoding="utf-8", newline="") as f:
         tsv_rows = list(csv.DictReader(f, delimiter="\t"))
     assert len(tsv_rows) == 3
