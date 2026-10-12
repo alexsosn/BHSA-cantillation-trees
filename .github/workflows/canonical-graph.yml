@@ -6,6 +6,8 @@ on:
       - ".github/workflows/canonical-graph.yml"
       - "src/bhsa_cantillation/graph*.py"
       - "src/bhsa_cantillation/cli.py"
+      - "src/bhsa_cantillation/boundaries.py"
+      - "tests/test_boundaries.py"
       - "tests/test_graph*.py"
   workflow_dispatch:
 
@@ -78,3 +80,61 @@ jobs:
           print("Verified complete graph:", stats)
           PY
           du -sh build/canonical-graph/2021
+
+      - name: Export and independently cross-check all saved phrase boundaries
+        run: |
+          bhsa-cantillation boundaries \
+            --graph build/canonical-graph/2021 --format jsonl \
+            --output build/boundaries.jsonl
+          bhsa-cantillation boundaries \
+            --graph build/canonical-graph/2021 --format jsonl \
+            --output build/boundaries-again.jsonl
+          cmp build/boundaries.jsonl build/boundaries-again.jsonl
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          from tf.fabric import Fabric
+
+          source = Path("build/canonical-graph/2021")
+          api = Fabric(locations=str(source), silent="deep").load(
+              "cantillation_main_cut_word_index cantillation_word_count", silent="deep"
+          )
+          assert api is not None
+          count = 0
+          keys = set()
+          root_cuts = {}
+          previous = None
+          for line in Path("build/boundaries.jsonl").open(encoding="utf-8"):
+              record = json.loads(line)
+              count += 1
+              key = (record["verse_node"], record["phrase_id"])
+              assert key not in keys, key
+              keys.add(key)
+              order = (record["verse_node"], record["first_unit"], record["last_unit"])
+              assert previous is None or order > previous, (previous, order)
+              previous = order
+              assert record["phrase_word_count"] == (
+                  record["first_child_word_count"] + record["second_child_word_count"]
+              )
+              assert record["phrase_first_word_index"] <= record["cut_after_word_index"]
+              assert record["cut_after_word_index"] < record["phrase_last_word_index"]
+              if record["depth"] == 0:
+                  verse = record["verse_node"]
+                  assert verse not in root_cuts
+                  root_cuts[verse] = record["cut_after_word_index"]
+                  assert record["cut_after_word_index"] == int(
+                      api.F.cantillation_main_cut_word_index.v(verse)
+                  )
+                  assert record["phrase_word_count"] == int(
+                      api.F.cantillation_word_count.v(verse)
+                  )
+          assert count == 142534, count
+          assert len(root_cuts) == 23202, len(root_cuts)
+          assert "Gen.1.1" in {key[1].split("#", 1)[0] for key in keys}
+          for verse in api.F.otype.s("verse"):
+              assert (api.F.cantillation_main_cut_word_index.v(verse) is None) == (
+                  verse not in root_cuts
+              )
+          print("Verified persisted boundaries, root source coordinates and determinism")
+          PY
