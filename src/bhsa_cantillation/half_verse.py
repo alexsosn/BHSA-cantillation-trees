@@ -219,7 +219,8 @@ def write_half_verse_rows(
             for record in iter_half_verse_rows(api, verse_ids=verse_ids):
                 counts[record["status"]] += 1
                 if fmt == "jsonl":
-                    handle.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
+                    line = json.dumps(record, ensure_ascii=False, separators=(",", ":"))
+                    handle.write(line + "\n")
                 else:
                     writer.writerow(record)
         os.replace(temporary, output)
