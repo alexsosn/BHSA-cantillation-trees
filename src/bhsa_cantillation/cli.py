@@ -36,6 +36,10 @@ def parser() -> argparse.ArgumentParser:
     )
     boundaries.add_argument("--graph", type=Path, required=True, help="derived graph TF directory")
     boundaries.add_argument("--format", choices=("jsonl", "tsv"), default="jsonl")
+    boundaries.add_argument(
+        "--verse", action="append", default=[], metavar="OSIS_ID",
+        help="select an exact OSIS verse ID; repeat for multiple verses",
+    )
     boundaries.add_argument("--output", type=Path, required=True)
     return root
 
@@ -70,7 +74,8 @@ def main(argv: list[str] | None = None) -> int:
         from .boundaries import load_boundary_api, write_boundary_rows
 
         count = write_boundary_rows(
-            load_boundary_api(args.graph), args.output, fmt=args.format
+            load_boundary_api(args.graph), args.output,
+            fmt=args.format, verse_ids=args.verse or None,
         )
         print(json.dumps({"boundaries": count, "output": str(args.output)}, sort_keys=True))
         return 0

@@ -138,3 +138,30 @@ jobs:
               )
           print("Verified persisted boundaries, root source coordinates and determinism")
           PY
+
+      - name: Cross-check selected OSIS boundaries against full pinned export
+        run: |
+          bhsa-cantillation boundaries \
+            --graph build/canonical-graph/2021 --format jsonl \
+            --verse Gen.1.2 --verse Gen.1.1 --verse Gen.1.1 \
+            --output build/selected-boundaries.jsonl
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          def read(path):
+              return [
+                  json.loads(line)
+                  for line in Path(path).read_text(encoding="utf-8").splitlines()
+              ]
+
+          chosen = {"Gen.1.1", "Gen.1.2"}
+          expected = [
+              row for row in read("build/boundaries.jsonl")
+              if row["osis_id"] in chosen
+          ]
+          selected = read("build/selected-boundaries.jsonl")
+          assert selected == expected
+          assert {row["osis_id"] for row in selected} == chosen
+          print(f"Selective boundary export matches {len(selected)} canonical full-export rows")
+          PY

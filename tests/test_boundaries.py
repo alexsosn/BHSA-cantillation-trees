@@ -288,3 +288,116 @@ def test_cli_jsonl_tsv_are_deterministic_and_share_schema(graph_path, tmp_path):
     assert len(tsv_rows) == 3
     assert list(tsv_rows[0]) == list(parsed[0])
     assert [int(row["cut_after_word_index"]) for row in tsv_rows] == [1, 2, 3]
+
+def test_cli_select_one_verse_jsonl_from_saved_two_verse_graph(tmp_path):
+    target = save_graph(tmp_path, singleton=True)
+    expected = list(iter_boundary_rows(load_boundary_api(target)))
+    output = tmp_path / "selected.jsonl"
+    assert main([
+        "boundaries", "--graph", str(target), "--output", str(output),
+        "--verse", "Gen.1.1",
+    ]) == 0
+    assert [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()] == (
+        expected
+    )
+    original = output.read_bytes()
+    assert main([
+        "boundaries", "--graph", str(target), "--output", str(output),
+        "--verse", "Gen.1.1",
+    ]) == 0
+    assert output.read_bytes() == original
+
+
+@pytest.mark.parametrize("fmt", ["jsonl", "tsv"])
+def test_cli_select_known_singleton_verse_yields_empty_with_fixed_schema(tmp_path, fmt):
+    target = save_graph(tmp_path, singleton=True)
+    output = tmp_path / f"singleton.{fmt}"
+    assert main([
+        "boundaries", "--graph", str(target), "--format", fmt,
+        "--output", str(output), "--verse", "Ps.117.1",
+    ]) == 0
+    if fmt == "jsonl":
+        assert output.read_bytes() == b""
+    else:
+        with output.open(encoding="utf-8", newline="") as handle:
+            reader = csv.DictReader(handle, delimiter="\t")
+            assert list(reader) == []
+            assert reader.fieldnames is not None
+            assert reader.fieldnames[0:2] == ["verse_node", "osis_id"]
+
+
+def test_cli_select_repeated_verses_is_deduplicated_and_in_graph_order(tmp_path):
+    target = save_graph(tmp_path, singleton=True)
+    output = tmp_path / "multi.jsonl"
+    assert main([
+        "boundaries", "--graph", str(target), "--output", str(output),
+        "--verse", "Ps.117.1", "--verse", "Gen.1.1",
+        "--verse", "Gen.1.1",
+    ]) == 0
+    assert [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()] == (
+        list(iter_boundary_rows(load_boundary_api(target)))
+    )
+
+
+def test_cli_unknown_osis_fails_and_preserves_existing_export(tmp_path):
+    target = save_graph(tmp_path, singleton=True)
+    output = tmp_path / "prior.tsv"
+    output.write_bytes(b"old export\n")
+    with pytest.raises(ValueError, match="Unknown|unknown|not found"):
+        main([
+            "boundaries", "--graph", str(target), "--format", "tsv",
+            "--output", str(output), "--verse", "Ps.117.999",
+        ])
+    assert output.read_bytes() == b"old export\n"
+    assert not list(tmp_path.glob(".prior.tsv.*.tmp"))
+
+
+def test_cli_selected_singleton_still_validates_nonselected_corrupt_verse(tmp_path):
+    tf = pytest.importorskip("tf.fabric")
+    target = save_graph(tmp_path, singleton=True)
+    output = tmp_path / "prior.jsonl"
+    output.write_bytes(b"keep this\n")
+    assert tf.Fabric(locations=str(target), silent="deep").save(
+        edgeFeatures={"cant_cut_after": {9: {12}}},
+        metaData={"cant_cut_after": {"valueType": "str"}},
+        silent="deep",
+    )
+    with pytest.raises(ValueError, match="cut|phrase"):
+        main([
+            "boundaries", "--graph", str(target), "--output", str(output),
+            "--verse", "Ps.117.1",
+        ])
+    assert output.read_bytes() == b"keep this\n"
+
+
+def test_adversarial_partially_matched_selection_preserves_existing_output(tmp_path):
+    target = save_graph(tmp_path, singleton=True)
+    output = tmp_path / "prior.jsonl"
+    output.write_bytes(b"previous successful output\n")
+    with pytest.raises(ValueError, match="Unknown OSIS"):
+        main([
+            "boundaries", "--graph", str(target), "--output", str(output),
+            "--verse", "Gen.1.1", "--verse", "Gen.1.999",
+        ])
+    assert output.read_bytes() == b"previous successful output\n"
+    assert not list(tmp_path.glob(".prior.jsonl.*.tmp"))
+
+
+def test_adversarial_forged_duplicate_osis_identity_is_rejected(tmp_path):
+    tf = pytest.importorskip("tf.fabric")
+    target = save_graph(tmp_path, singleton=True)
+    saved = load_boundary_api(target)
+    singleton_root = saved.E.cant_root.f(8)[0]
+    unit_ids = {
+        node: saved.F.cant_unit_id.v(node)
+        for node in saved.F.otype.s("cant_unit")
+    }
+    assert unit_ids[singleton_root] == "Ps.117.1#u1"
+    unit_ids[singleton_root] = "Gen.1.1#u1"
+    assert tf.Fabric(locations=str(target), silent="deep").save(
+        nodeFeatures={"cant_unit_id": unit_ids},
+        metaData={"cant_unit_id": {"valueType": "str"}},
+        silent="deep",
+    )
+    with pytest.raises(ValueError, match="Duplicate OSIS"):
+        list(iter_boundary_rows(load_boundary_api(target), verse_ids={"Gen.1.1"}))
