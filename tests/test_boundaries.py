@@ -368,3 +368,36 @@ def test_cli_selected_singleton_still_validates_nonselected_corrupt_verse(tmp_pa
             "--verse", "Ps.117.1",
         ])
     assert output.read_bytes() == b"keep this\n"
+
+
+def test_adversarial_partially_matched_selection_preserves_existing_output(tmp_path):
+    target = save_graph(tmp_path, singleton=True)
+    output = tmp_path / "prior.jsonl"
+    output.write_bytes(b"previous successful output\n")
+    with pytest.raises(ValueError, match="Unknown OSIS"):
+        main([
+            "boundaries", "--graph", str(target), "--output", str(output),
+            "--verse", "Gen.1.1", "--verse", "Gen.1.999",
+        ])
+    assert output.read_bytes() == b"previous successful output\n"
+    assert not list(tmp_path.glob(".prior.jsonl.*.tmp"))
+
+
+def test_adversarial_forged_duplicate_osis_identity_is_rejected(tmp_path):
+    tf = pytest.importorskip("tf.fabric")
+    target = save_graph(tmp_path, singleton=True)
+    saved = load_boundary_api(target)
+    singleton_root = saved.E.cant_root.f(8)[0]
+    unit_ids = {
+        node: saved.F.cant_unit_id.v(node)
+        for node in saved.F.otype.s("cant_unit")
+    }
+    assert unit_ids[singleton_root] == "Ps.117.1#u1"
+    unit_ids[singleton_root] = "Gen.1.1#u1"
+    assert tf.Fabric(locations=str(target), silent="deep").save(
+        nodeFeatures={"cant_unit_id": unit_ids},
+        metaData={"cant_unit_id": {"valueType": "str"}},
+        silent="deep",
+    )
+    with pytest.raises(ValueError, match="Duplicate OSIS"):
+        list(iter_boundary_rows(load_boundary_api(target), verse_ids={"Gen.1.1"}))
