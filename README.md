@@ -211,6 +211,56 @@ unselected verses and disconnected nodes. Unknown OSIS IDs raise an error withou
 replacing an existing output file. A known single-unit verse has zero rows:
 JSONL is empty, while TSV contains only its header.
 
+## Compare root cantillation splits with BHSA half-verses
+
+The read-only `compare-halves` command inspects the **persisted, derived TF
+graph** and the original BHSA `half_verse` nodes included in that graph. It
+does not rebuild segmentation or add graph edges.
+
+```bash
+bhsa-cantillation compare-halves \
+  --graph build/canonical-graph/2021 \
+  --format jsonl --output build/half-verse-comparison.jsonl
+bhsa-cantillation compare-halves \
+  --graph build/canonical-graph/2021 \
+  --verse Gen.1.1 --verse Gen.35.22 --verse Ps.36.1 \
+  --format tsv --output build/half-verse-examples.tsv
+```
+
+The exporter writes **one row for every requested OSIS verse**, including
+single-unit cantillation verses, in canonical numeric BHSA verse order.
+`--verse` takes exact, case-sensitive OSIS IDs and can be repeated. Unknown
+IDs fail without replacing an earlier output. As with `boundaries`, the
+**entire saved cantillation graph** is validated even for a selection; output
+replacement happens atomically after validation.
+
+Each row includes `verse_node`, `osis_id`, `system`, `alignment`,
+`root_phrase_node`, the inclusive 1-based MorphHB
+`root_cut_after_word_index`, `half_verse_count`, semicolon-delimited
+`half_verse_nodes` and `half_verse_spans`, the first BHSA half span, exact
+root-left/right BHSA slot sets, and an overlap count. Slot sets use inclusive
+ranges separated by commas, e.g. `1-3,5`; no source-word index is compared
+as if it were a BHSA word slot.
+
+`status` has mutually exclusive outcomes: `match` (root-left slot set equals
+first half-verse slot set), `mismatch` (unambiguous unequal sets),
+`no_root_split` (one accentual unit), `missing_half_verse` (no BHSA nodes),
+`nonbinary_half_verse` (one or more than two BHSA segments),
+`ambiguous_half_verse` (two segments with gaps/overlap/incomplete coverage),
+`fuzzy_alignment` (MorphHB/BHSA alignment is not exact), and
+`ambiguous_root_slots` (root children overlap in BHSA slots or fail to
+cover the BHSA verse). Conditions are evaluated in that precedence order.
+The command prints a JSON summary with `status_counts`, `verses`, and
+`comparable`, where the agreement **denominator** is strictly
+`match + mismatch`. Inconclusive statuses are never counted as mismatches.
+
+For the pinned 2021 BHSA warp, 1,603 verses have one `half_verse`, 21,254
+have two, and 356 have three. The three-segment group includes Gen.35.22
+and Ezek.32.30 as prose exceptions; the other 354 are poetic. All pinned
+half-verse spans partition their verses exactly. The 11 source single-unit
+verses are Psalm superscriptions, and 10 verses have fuzzy alignments.
+These cardinalities are validated in the pinned CI workflow.
+
 ## Export and ASCII rendering
 
 Export the whole module as JSON Lines, or select verses into a JSON array:

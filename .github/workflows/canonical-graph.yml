@@ -165,3 +165,76 @@ jobs:
           assert {row["osis_id"] for row in selected} == chosen
           print(f"Selective boundary export matches {len(selected)} canonical full-export rows")
           PY
+
+      - name: E2E compare pinned BHSA half-verse spans to saved cantillation root cuts
+        run: |
+          bhsa-cantillation compare-halves \
+            --graph build/canonical-graph/2021 --format jsonl \
+            --output build/half-verse-comparison.jsonl
+          bhsa-cantillation compare-halves \
+            --graph build/canonical-graph/2021 --format tsv \
+            --verse Ps.36.1 --verse Gen.35.22 --verse Gen.1.13 --verse Gen.1.1 \
+            --output build/half-verse-selected.tsv
+          python - <<'PY'
+          import csv
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          from bhsa_cantillation.boundaries import load_boundary_api
+
+          path = Path("build/half-verse-comparison.jsonl")
+          rows = [json.loads(line) for line in path.open(encoding="utf-8")]
+          assert len(rows) == 23213
+          assert [r["verse_node"] for r in rows] == list(range(1414389, 1437602))
+          assert Counter(r["half_verse_count"] for r in rows) == {
+              1: 1603, 2: 21254, 3: 356,
+          }
+          assert sum(r["alignment"] == "fuzzy" for r in rows) == 10
+          assert sum(r["status"] == "no_root_split" for r in rows) == 11
+          assert sum(r["status"] in ("match", "mismatch") for r in rows) > 0
+
+          by_id = {r["osis_id"]: r for r in rows}
+          assert len(by_id) == len(rows)
+          assert by_id["Gen.1.13"]["status"] == "nonbinary_half_verse"
+          assert by_id["Gen.35.22"]["half_verse_count"] == 3
+          assert by_id["Ezek.32.30"]["half_verse_count"] == 3
+          assert by_id["Ps.36.1"]["status"] == "no_root_split"
+          chosen = {"Gen.1.1", "Gen.1.13", "Gen.35.22", "Ps.36.1"}
+          with Path("build/half-verse-selected.tsv").open(
+              encoding="utf-8", newline=""
+          ) as handle:
+              selected = list(csv.DictReader(handle, delimiter="\t"))
+          expected = [
+              {key: "" if value is None else str(value) for key, value in row.items()}
+              for row in rows if row["osis_id"] in chosen
+          ]
+          assert selected == expected
+
+          api = load_boundary_api(Path("build/canonical-graph/2021"))
+          roots = {
+              r["root_phrase_node"]
+              for r in rows if r["status"] in ("match", "mismatch")
+          }
+          left_child = {}
+          for child, targets in api.E.cant_parent.data.items():
+              for parent, position in targets.items():
+                  if parent in roots and position == 1:
+                      left_child[parent] = child
+          assert set(left_child) == roots
+          for row in rows:
+              parts = row["half_verse_nodes"].split(";") if row["half_verse_nodes"] else []
+              assert len(parts) == row["half_verse_count"]
+              if row["status"] not in ("match", "mismatch"):
+                  continue
+              first_half = int(parts[0])
+              root_left = left_child[row["root_phrase_node"]]
+              agreed = set(api.E.oslots.s(first_half)) == set(api.E.oslots.s(root_left))
+              assert agreed == (row["status"] == "match"), row
+
+          statuses = Counter(r["status"] for r in rows)
+          mismatches = [r["osis_id"] for r in rows if r["status"] == "mismatch"]
+          print("Pinned half-verse status counts:", dict(sorted(statuses.items())))
+          print("First exact-alignment mismatches:", mismatches[:10])
+          print("Verified 23,213 saved-graph/BHSA comparisons and selected TSV CLI")
+          PY
