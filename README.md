@@ -173,6 +173,11 @@ bhsa-cantillation boundaries \
 bhsa-cantillation boundaries \
   --graph build/canonical-graph/2021 \
   --format tsv --output boundaries.tsv
+# Export just two exact OSIS verse IDs, retaining canonical graph order:
+bhsa-cantillation boundaries \
+  --graph build/canonical-graph/2021 \
+  --verse Gen.1.2 --verse Gen.1.1 \
+  --format jsonl --output genesis-boundaries.jsonl
 ```
 
 Each boundary corresponds to a persisted `cant_phrase` node; the exporter reads
@@ -199,6 +204,12 @@ The output also preserves `verse_node`, `osis_id`, `system`, `alignment`,
 as numbers; TSV uses a header and UTF-8 text. Both formats have fixed field
 order. The exporter rejects inconsistent or disconnected persisted graphs and
 replaces its output atomically only after every verse validates.
+Repeated `--verse` arguments select exact, case-sensitive OSIS IDs. Duplicate
+selections are ignored; output remains in canonical graph order, not argument
+order. Even with a selection, **the full saved graph is validated**, including
+unselected verses and disconnected nodes. Unknown OSIS IDs raise an error without
+replacing an existing output file. A known single-unit verse has zero rows:
+JSONL is empty, while TSV contains only its header.
 
 ## Export and ASCII rendering
 
