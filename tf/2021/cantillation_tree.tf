@@ -10,7 +10,7 @@
 @valueType=str
 @version=2021
 @writtenBy=Text-Fabric
-@dateWritten=2026-10-12T14:28:06+00:00Z
+@dateWritten=2026-11-04T13:38:07+00:00Z
 
 1414389	{"accent":"Atnach","children":[{"accent":"Tipcha","children":[{"path":"1.0","slots":[1,2],"text":"בְּרֵאשִׁ֖ית","accent":"Tipcha"},{"path":"1","slots":[3,4],"text":"בָּרָ֣א אֱלֹהִ֑ים","accent":"Atnach"}]},{"accent":"Tipcha","children":[{"path":"0.0","slots":[5,7],"text":"אֵ֥ת הַשָּׁמַ֖יִם","accent":"Tipcha"},{"path":"0","slots":[8,11],"text":"וְאֵ֥ת הָאָֽרֶץ׃","accent":"Sof Pasuq"}]}]}
 {"accent":"Atnach","children":[{"accent":"Zaqef Qatan","children":[{"accent":"Revia","children":[{"path":"1.1.1","slots":[12,14],"text":"וְהָאָ֗רֶץ","accent":"Revia"},{"accent":"Pashta","children":[{"path":"1.1.0","slots":[15,16],"text":"הָיְתָ֥ה תֹ֨הוּ֙","accent":"Pashta"},{"path":"1.1","slots":[17,18],"text":"וָבֹ֔הוּ","accent":"Zaqef Qatan"}]}]},{"accent":"Tipcha","children":[{"path":"1.0","slots":[19,20],"text":"וְחֹ֖שֶׁךְ","accent":"Tipcha"},{"path":"1","slots":[21,23],"text":"עַל־ פְּנֵ֣י תְה֑וֹם","accent":"Atnach"}]}]},{"accent":"Zaqef Qatan","children":[{"path":"0.1","slots":[24,26],"text":"וְר֣וּחַ אֱלֹהִ֔ים","accent":"Zaqef Qatan"},{"accent":"Tipcha","children":[{"path":"0.0","slots":[27,27],"text":"מְרַחֶ֖פֶת","accent":"Tipcha"},{"path":"0","slots":[28,31],"text":"עַל־ פְּנֵ֥י הַמָּֽיִם׃","accent":"Sof Pasuq"}]}]}]}
