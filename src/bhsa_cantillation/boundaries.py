@@ -11,7 +11,7 @@ import csv
 import json
 import os
 import tempfile
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -95,14 +95,17 @@ def load_boundary_api(graph_path: Path):
     return api
 
 
-def iter_boundary_rows(api) -> Iterator[dict]:
+def iter_boundary_rows(api, *, verse_ids: Collection[str] | None = None) -> Iterator[dict]:
     """Yield one boundary per saved cant_phrase, sorted by verse and textual span.
 
     The entire persisted parent/root/cut graph is validated as it is traversed.
     A corrupt graph fails closed rather than silently deriving a replacement cut.
     The consumer must exhaust the iterator to check for orphan nodes.
+    When verse_ids is provided, nonselected verses are still fully validated.
     """
     F, E = api.F, api.E
+    selected = set(verse_ids) if verse_ids is not None else None
+    seen_osis_ids: set[str] = set()
     verses = set(F.otype.s("verse"))
     phrases = set(F.otype.s("cant_phrase"))
     units = set(F.otype.s("cant_unit"))
@@ -295,6 +298,13 @@ def iter_boundary_rows(api) -> Iterator[dict]:
             prefix.append(end)
         if prefix[-1] != span.words:
             raise ValueError(f"Source word count drift at verse {verse}")
+        if not verse_id:
+            raise ValueError(f"Missing OSIS verse identity at {verse}")
+        if verse_id in seen_osis_ids:
+            raise ValueError(f"Duplicate OSIS verse identity in saved graph: {verse_id}")
+        seen_osis_ids.add(verse_id)
+        if selected is not None and verse_id not in selected:
+            return
         for row in sorted(
             records, key=lambda r: (r["first_unit"], r["last_unit"], r["phrase_node"])
         ):
@@ -317,9 +327,14 @@ def iter_boundary_rows(api) -> Iterator[dict]:
 
     if visited != graph_nodes or seen_words != words or set(parents) != graph_nodes - roots:
         raise ValueError("Orphan or disconnected cantillation nodes in saved graph")
+    missing = selected - seen_osis_ids if selected is not None else set()
+    if missing:
+        raise ValueError(f"Unknown OSIS verse ID(s): {', '.join(sorted(missing))}")
 
 
-def write_boundary_rows(api, output: Path, *, fmt: str = "jsonl") -> int:
+def write_boundary_rows(
+    api, output: Path, *, fmt: str = "jsonl", verse_ids: Collection[str] | None = None
+) -> int:
     """Atomically write deterministic JSONL/TSV; preserve old file on validation error."""
     if fmt not in ("jsonl", "tsv"):
         raise ValueError(f"Unsupported boundary output format: {fmt}")
@@ -335,7 +350,7 @@ def write_boundary_rows(api, output: Path, *, fmt: str = "jsonl") -> int:
             if fmt == "tsv":
                 writer = csv.DictWriter(handle, fieldnames=BOUNDARY_FIELDS, delimiter="\t")
                 writer.writeheader()
-            for record in iter_boundary_rows(api):
+            for record in iter_boundary_rows(api, verse_ids=verse_ids):
                 if fmt == "jsonl":
                     line = json.dumps(record, ensure_ascii=False, separators=(",", ":"))
                     handle.write(line + "\n")
