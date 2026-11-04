@@ -4,12 +4,12 @@ import csv
 import json
 
 import pytest
+from bhsa_cantillation.half_verse import iter_half_verse_rows
 
 from bhsa_cantillation.boundaries import load_boundary_api
 from bhsa_cantillation.cli import main
 from bhsa_cantillation.graph import project_graph
 from bhsa_cantillation.graph_tf import GraphTFCollector, materialize_graph_types
-from bhsa_cantillation.half_verse import iter_half_verse_rows
 from bhsa_cantillation.model import SourceWord, WordAlignment
 from bhsa_cantillation.tree import build_tree, make_units
 
