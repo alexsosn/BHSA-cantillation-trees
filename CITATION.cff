@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software in your research, please cite it using this metadata."
+type: software
+title: "BHSA cantillation trees"
+abstract: >-
+  Text-Fabric add-on for the ETCBC BHSA 2021 dataset that reconstructs
+  cantillation-based prosodic trees from MorphHB and exposes word- and
+  verse-level cantillation features.
+authors:
+  - family-names: Sosnovshchenko
+    given-names: Alex
+version: 0.1.0
+license: MIT
+repository-code: https://github.com/alexsosn/BHSA-cantillation-trees
