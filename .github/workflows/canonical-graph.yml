@@ -173,7 +173,8 @@ jobs:
             --output build/half-verse-comparison.jsonl
           bhsa-cantillation compare-halves \
             --graph build/canonical-graph/2021 --format tsv \
-            --verse Ps.36.1 --verse Gen.35.22 --verse Gen.1.13 --verse Gen.1.1 \
+            --verse Ps.36.1 --verse Gen.35.22 --verse Gen.7.11 \
+            --verse Gen.1.13 --verse Gen.1.1 \
             --output build/half-verse-selected.tsv
           python - <<'PY'
           import csv
@@ -200,7 +201,8 @@ jobs:
           assert by_id["Gen.35.22"]["half_verse_count"] == 3
           assert by_id["Ezek.32.30"]["half_verse_count"] == 3
           assert by_id["Ps.36.1"]["status"] == "no_root_split"
-          chosen = {"Gen.1.1", "Gen.1.13", "Gen.35.22", "Ps.36.1"}
+          assert by_id["Gen.7.11"]["status"] == "mismatch"
+          chosen = {"Gen.1.1", "Gen.1.13", "Gen.7.11", "Gen.35.22", "Ps.36.1"}
           with Path("build/half-verse-selected.tsv").open(
               encoding="utf-8", newline=""
           ) as handle:
