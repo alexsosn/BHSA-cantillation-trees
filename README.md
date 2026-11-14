@@ -223,7 +223,7 @@ bhsa-cantillation compare-halves \
   --format jsonl --output build/half-verse-comparison.jsonl
 bhsa-cantillation compare-halves \
   --graph build/canonical-graph/2021 \
-  --verse Gen.1.1 --verse Gen.35.22 --verse Ps.36.1 \
+  --verse Gen.1.1 --verse Gen.7.11 --verse Gen.35.22 --verse Ps.36.1 \
   --format tsv --output build/half-verse-examples.tsv
 ```
 
@@ -260,7 +260,10 @@ have two, and 356 have three. The three-segment group includes Gen.35.22
 and Ezek.32.30 as prose exceptions; the other 354 are poetic. All pinned
 half-verse spans partition their verses exactly. The 11 source single-unit
 verses are Psalm superscriptions, and 10 verses have fuzzy alignments.
-These cardinalities are validated in the pinned CI workflow.
+These cardinalities are validated in the pinned CI workflow. In this pinned
+corpus, `Gen.1.1` is a confirmed match and `Gen.7.11` is a confirmed mismatch;
+`Gen.35.22` has three BHSA segments, while `Ps.36.1` has no root cut.
+These are suitable CLI smoke-test examples.
 
 ## Export and ASCII rendering
 
