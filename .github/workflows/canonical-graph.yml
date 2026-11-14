@@ -176,6 +176,26 @@ jobs:
             --verse Ps.36.1 --verse Gen.35.22 --verse Gen.7.11 \
             --verse Gen.1.13 --verse Gen.1.1 \
             --output build/half-verse-selected.tsv
+          # Select a *verified* mismatch rather than assuming an old
+          # mismatch label remains valid after root-slot validation changes.
+          mismatch_osis="$(python - <<'PY'
+          import json
+          from pathlib import Path
+
+          with Path("build/half-verse-comparison.jsonl").open(encoding="utf-8") as handle:
+              for line in handle:
+                  row = json.loads(line)
+                  if row["status"] == "mismatch":
+                      print(row["osis_id"])
+                      break
+              else:
+                  raise ValueError("No pinned half-verse mismatch to smoke-test")
+          PY
+          )"
+          bhsa-cantillation compare-halves \
+            --graph build/canonical-graph/2021 --format tsv \
+            --verse "$mismatch_osis" \
+            --output build/half-verse-mismatch.tsv
           python - <<'PY'
           import csv
           import json
@@ -201,7 +221,7 @@ jobs:
           assert by_id["Gen.35.22"]["half_verse_count"] == 3
           assert by_id["Ezek.32.30"]["half_verse_count"] == 3
           assert by_id["Ps.36.1"]["status"] == "no_root_split"
-          assert by_id["Gen.7.11"]["status"] == "mismatch"
+          assert by_id["Gen.7.11"]["status"] == "ambiguous_root_slots"
           chosen = {"Gen.1.1", "Gen.1.13", "Gen.7.11", "Gen.35.22", "Ps.36.1"}
           with Path("build/half-verse-selected.tsv").open(
               encoding="utf-8", newline=""
@@ -212,6 +232,16 @@ jobs:
               for row in rows if row["osis_id"] in chosen
           ]
           assert selected == expected
+          true_mismatch = next(r for r in rows if r["status"] == "mismatch")
+          with Path("build/half-verse-mismatch.tsv").open(
+              encoding="utf-8", newline=""
+          ) as handle:
+              chosen_mismatch = list(csv.DictReader(handle, delimiter="\t"))
+          assert chosen_mismatch == [{
+              key: "" if value is None else str(value)
+              for key, value in true_mismatch.items()
+          }]
+          print("Independently smoked a true pinned mismatch:", true_mismatch["osis_id"])
 
           api = load_boundary_api(Path("build/canonical-graph/2021"))
           roots = {
@@ -244,6 +274,10 @@ jobs:
               assert agreed == (row["status"] == "match"), row
 
           statuses = Counter(r["status"] for r in rows)
+          assert statuses == {
+              "match": 20991, "mismatch": 43, "ambiguous_root_slots": 212,
+              "nonbinary_half_verse": 1948, "no_root_split": 11, "fuzzy_alignment": 8,
+          }, statuses
           mismatches = [r["osis_id"] for r in rows if r["status"] == "mismatch"]
           print("Pinned half-verse status counts:", dict(sorted(statuses.items())))
           print("First exact-alignment mismatches:", mismatches[:10])
