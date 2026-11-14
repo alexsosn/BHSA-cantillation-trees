@@ -171,3 +171,20 @@ def test_unknown_verse_preserves_existing_comparison_and_removes_temporary(tmp_p
         ])
     assert output.read_bytes() == b"known good\n"
     assert not list(tmp_path.glob(".prior.jsonl.*.tmp"))
+
+
+@pytest.mark.parametrize(
+    "slot_order",
+    [
+        (1, 3, 2, 4),  # root children interleave in BHSA textual order
+        (3, 4, 1, 2),  # root children have disjoint spans but reverse BHSA order
+    ],
+)
+def test_adversarial_disjoint_but_nonmonotone_root_slots_are_inconclusive(
+    tmp_path, slot_order
+):
+    """A MorphHB root cut must project to a *single ordered* BHSA boundary."""
+    gen, _ = get_rows(tmp_path, slots=slot_order)
+    assert gen["alignment"] == "exact"
+    assert gen["root_overlap_slot_count"] == 0
+    assert gen["status"] == "ambiguous_root_slots"
