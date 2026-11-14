@@ -248,8 +248,9 @@ first half-verse slot set), `mismatch` (unambiguous unequal sets),
 `nonbinary_half_verse` (one or more than two BHSA segments),
 `ambiguous_half_verse` (two segments with gaps/overlap/incomplete coverage),
 `fuzzy_alignment` (MorphHB/BHSA alignment is not exact), and
-`ambiguous_root_slots` (root children overlap in BHSA slots or fail to
-cover the BHSA verse). Conditions are evaluated in that precedence order.
+`ambiguous_root_slots` (root children overlap, fail to cover the BHSA
+verse, interleave, or appear in reverse BHSA slot order). A comparable root
+cut must project to two **contiguous, forward-ordered** BHSA slot spans. Conditions are evaluated in that precedence order.
 The command prints a JSON summary with `status_counts`, `verses`, and
 `comparable`, where the agreement **denominator** is strictly
 `match + mismatch`. Inconclusive statuses are never counted as mismatches.
