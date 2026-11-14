@@ -260,10 +260,17 @@ have two, and 356 have three. The three-segment group includes Gen.35.22
 and Ezek.32.30 as prose exceptions; the other 354 are poetic. All pinned
 half-verse spans partition their verses exactly. The 11 source single-unit
 verses are Psalm superscriptions, and 10 verses have fuzzy alignments.
-These cardinalities are validated in the pinned CI workflow. In this pinned
-corpus, `Gen.1.1` is a confirmed match and `Gen.7.11` is a confirmed mismatch;
-`Gen.35.22` has three BHSA segments, while `Ps.36.1` has no root cut.
-These are suitable CLI smoke-test examples.
+These cardinalities are validated in the pinned CI workflow. The pinned
+comparison reports **20,991 matches, 43 mismatches and 212 ambiguous
+root-slot projections**, yielding **21,034 comparable verses** (99.80%
+agreement). It also reports 1,948 nonbinary half-verse cases, 11 unsplit
+cantillation verses and 8 fuzzy-alignment cases.
+
+For examples, `Gen.1.1` is a match; `Gen.7.11` has an ambiguous root
+projection and must not be counted as a mismatch; `Gen.35.22` has three
+BHSA segments, while `Ps.36.1` has no root cut. The pinned E2E test also
+selects a genuine mismatch from the full exported data and verifies it
+independently through the CLI.
 
 ## Export and ASCII rendering
 
