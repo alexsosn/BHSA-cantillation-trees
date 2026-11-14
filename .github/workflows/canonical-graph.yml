@@ -216,20 +216,29 @@ jobs:
               r["root_phrase_node"]
               for r in rows if r["status"] in ("match", "mismatch")
           }
-          left_child = {}
+          root_children = {}
           for child, targets in api.E.cant_parent.data.items():
               for parent, position in targets.items():
-                  if parent in roots and position == 1:
-                      left_child[parent] = child
-          assert set(left_child) == roots
+                  if parent in roots:
+                      root_children.setdefault(parent, {})[position] = child
+          assert set(root_children) == roots
           for row in rows:
               parts = row["half_verse_nodes"].split(";") if row["half_verse_nodes"] else []
               assert len(parts) == row["half_verse_count"]
               if row["status"] not in ("match", "mismatch"):
                   continue
+              children = root_children[row["root_phrase_node"]]
+              assert set(children) == {1, 2}
               first_half = int(parts[0])
-              root_left = left_child[row["root_phrase_node"]]
-              agreed = set(api.E.oslots.s(first_half)) == set(api.E.oslots.s(root_left))
+              left = set(api.E.oslots.s(children[1]))
+              right = set(api.E.oslots.s(children[2]))
+              verse_slots = set(api.E.oslots.s(row["verse_node"]))
+              assert left and right and not left & right
+              assert left | right == verse_slots
+              assert len(left) == max(left) - min(left) + 1
+              assert len(right) == max(right) - min(right) + 1
+              assert max(left) + 1 == min(right)
+              agreed = set(api.E.oslots.s(first_half)) == left
               assert agreed == (row["status"] == "match"), row
 
           statuses = Counter(r["status"] for r in rows)
