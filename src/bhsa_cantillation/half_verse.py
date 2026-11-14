@@ -79,12 +79,10 @@ def _half_verses_by_verse(api, verses: list[int]) -> dict[int, list[tuple[int, f
     return result
 
 
-def _valid_binary_partition(
-    half_verses: list[tuple[int, frozenset[int]]], verse_slots: frozenset[int]
+def _valid_ordered_slot_partition(
+    left: frozenset[int], right: frozenset[int], verse_slots: frozenset[int]
 ) -> bool:
-    if len(half_verses) != 2:
-        return False
-    left, right = half_verses[0][1], half_verses[1][1]
+    """Require a single forward cut in BHSA slot order, not just set coverage."""
     return (
         bool(left) and bool(right)
         and not left & right
@@ -93,6 +91,14 @@ def _valid_binary_partition(
         and len(right) == max(right) - min(right) + 1
         and max(left) + 1 == min(right)
     )
+
+
+def _valid_binary_partition(
+    half_verses: list[tuple[int, frozenset[int]]], verse_slots: frozenset[int]
+) -> bool:
+    if len(half_verses) != 2:
+        return False
+    return _valid_ordered_slot_partition(half_verses[0][1], half_verses[1][1], verse_slots)
 
 
 def iter_half_verse_rows(
@@ -166,7 +172,7 @@ def iter_half_verse_rows(
             status = "ambiguous_half_verse"
         elif alignment != "exact":
             status = "fuzzy_alignment"
-        elif overlap or left | right != verse_slots:
+        elif not _valid_ordered_slot_partition(left, right, verse_slots):
             status = "ambiguous_root_slots"
         else:
             status = "match" if left == first_half else "mismatch"
