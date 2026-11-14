@@ -41,6 +41,17 @@ def parser() -> argparse.ArgumentParser:
         help="select an exact OSIS verse ID; repeat for multiple verses",
     )
     boundaries.add_argument("--output", type=Path, required=True)
+
+    halves = commands.add_parser(
+        "compare-halves", help="compare saved root cuts to original BHSA half_verse spans"
+    )
+    halves.add_argument("--graph", type=Path, required=True, help="derived graph TF directory")
+    halves.add_argument("--format", choices=("jsonl", "tsv"), default="jsonl")
+    halves.add_argument(
+        "--verse", action="append", default=[], metavar="OSIS_ID",
+        help="select an exact OSIS verse ID; repeat for multiple verses",
+    )
+    halves.add_argument("--output", type=Path, required=True)
     return root
 
 
@@ -78,6 +89,16 @@ def main(argv: list[str] | None = None) -> int:
             fmt=args.format, verse_ids=args.verse or None,
         )
         print(json.dumps({"boundaries": count, "output": str(args.output)}, sort_keys=True))
+        return 0
+    if args.command == "compare-halves":
+        from .boundaries import load_boundary_api
+        from .half_verse import write_half_verse_rows
+
+        stats = write_half_verse_rows(
+            load_boundary_api(args.graph), args.output,
+            fmt=args.format, verse_ids=args.verse or None,
+        )
+        print(json.dumps({**stats, "output": str(args.output)}, sort_keys=True))
         return 0
     return 2
 
