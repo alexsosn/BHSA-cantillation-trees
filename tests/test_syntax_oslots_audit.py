@@ -118,3 +118,11 @@ def test_gapped_sample_exposes_complete_exact_slot_runs():
     sample = next(item for item in result["examples"]["gapped"] if item["node"] == 9)
     assert sample["slot_ranges"] == "1-2,4"
     assert sample["slot_count"] == 3
+
+
+def test_pairwise_crossing_example_preserves_both_complete_slot_sets():
+    result = audit_syntax_oslots(
+        fixture_api(), verse_labels={20: "Gen.1.1", 21: "Gen.1.2"}
+    )
+    sample = next(item for item in result["examples"]["crossing"] if item["nodes"] == [9, 10])
+    assert sample["slot_ranges"] == ["1-2,4", "2-3"]
