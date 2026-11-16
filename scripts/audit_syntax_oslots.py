@@ -169,9 +169,9 @@ def audit_syntax_oslots(
                 counts[relation] += 1
                 if len(examples[relation]) < max_examples:
                     _sample(examples[relation], {
-                    "osis_id": osis,
-                    "nodes": [a, b],
-                    "types": [kind_a, kind_b],
+                        "osis_id": osis,
+                        "nodes": [a, b],
+                        "types": [kind_a, kind_b],
                         "slots": [sorted(slots_a)[:12], sorted(slots_b)[:12]],
                         "slot_ranges": [_slot_ranges(slots_a), _slot_ranges(slots_b)],
                     }, max_examples)
