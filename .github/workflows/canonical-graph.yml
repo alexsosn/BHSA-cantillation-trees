@@ -7,6 +7,8 @@ on:
       - "src/bhsa_cantillation/graph*.py"
       - "src/bhsa_cantillation/cli.py"
       - "src/bhsa_cantillation/boundaries.py"
+      - "src/bhsa_cantillation/syntax_boundary.py"
+      - "tests/test_syntax_boundary.py"
       - "tests/test_boundaries.py"
       - "tests/test_graph*.py"
       - "scripts/audit_syntax_oslots.py"
@@ -317,4 +319,112 @@ jobs:
           print("Pinned half-verse status counts:", dict(sorted(statuses.items())))
           print("First exact-alignment mismatches:", mismatches[:10])
           print("Verified 23,213 saved-graph/BHSA comparisons and selected TSV CLI")
+          PY
+
+      - name: E2E compare all saved cuts to original BHSA syntax endings
+        run: |
+          bhsa-cantillation compare-syntax \
+            --graph build/canonical-graph/2021 --format jsonl \
+            --output build/syntax-endings.jsonl > build/syntax-summary.json
+          bhsa-cantillation compare-syntax \
+            --graph build/canonical-graph/2021 --format jsonl \
+            --output build/syntax-endings-again.jsonl
+          cmp build/syntax-endings.jsonl build/syntax-endings-again.jsonl
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = [
+              json.loads(line) for line in
+              Path("build/syntax-endings.jsonl").read_text(encoding="utf-8").splitlines()
+          ]
+          summary = json.loads(Path("build/syntax-summary.json").read_text())
+          assert len(rows) == 142534
+          assert summary["cuts"] == len(rows)
+          assert 0 < summary["comparable"] < len(rows)
+          assert summary["status_counts"]["comparable"] == summary["comparable"]
+          assert sum(summary["status_counts"].values()) == len(rows)
+          assert summary["syntax_node_exclusions_global"]["phrase"]["cross_verse"] == 15
+          assert summary["syntax_node_exclusions_global"]["clause"]["cross_verse"] == 50
+          assert summary["syntax_node_exclusions_global"]["phrase_atom"]["cross_verse"] == 0
+          assert summary["syntax_node_exclusions_global"]["clause_atom"]["cross_verse"] == 0
+          assert all(r["ends_phrase"] is None for r in rows
+                     if r["slot_status"] != "comparable")
+          assert all(
+              r["bhsa_cut_after_slot"] is not None
+              for r in rows if r["slot_status"] == "comparable"
+          )
+          assert all(
+              sum(r[f"ends_{kind}"] is True for r in rows)
+              == summary["matches_by_type"][kind]
+              for kind in ("phrase", "phrase_atom", "clause", "clause_atom")
+          )
+          positives = [r for r in rows if r["slot_status"] == "comparable"
+                       and r["ends_phrase"]]
+          negatives = [r for r in rows if r["slot_status"] == "comparable"
+                       and not r["ends_phrase"]]
+          assert positives and negatives
+          yes, no = positives[0], negatives[0]
+          Path("build/syntax-selected-ids.txt").write_text(
+              yes["osis_id"] + "\n" + no["osis_id"] + "\n", encoding="utf-8"
+          )
+          Path("build/syntax-sample-rows.json").write_text(
+              json.dumps({"yes": yes, "no": no}, ensure_ascii=False)
+          )
+          print("All pinned syntax cut statuses:", summary["status_counts"])
+          print("First real phrase-ending coincidence:", yes["osis_id"],
+                yes["phrase_id"], yes["phrase_nodes"])
+          print("First real noncoincidence:", no["osis_id"], no["phrase_id"])
+          PY
+          readarray -t chosen < build/syntax-selected-ids.txt
+          bhsa-cantillation compare-syntax \
+            --graph build/canonical-graph/2021 --format tsv \
+            --verse "${chosen[1]}" --verse "${chosen[0]}" \
+            --verse "${chosen[0]}" \
+            --output build/syntax-selected.tsv
+          python - <<'PY'
+          import csv
+          import json
+          from pathlib import Path
+
+          from bhsa_cantillation.boundaries import load_boundary_api
+
+          samples = json.loads(Path("build/syntax-sample-rows.json").read_text())
+          rows = [
+              json.loads(line) for line in
+              Path("build/syntax-endings.jsonl").read_text(encoding="utf-8").splitlines()
+          ]
+          chosen = {samples["yes"]["osis_id"], samples["no"]["osis_id"]}
+          with Path("build/syntax-selected.tsv").open(
+              encoding="utf-8", newline=""
+          ) as handle:
+              selected = list(csv.DictReader(handle, delimiter="\t"))
+          expected = [
+              {key: "" if value is None else str(value) for key, value in row.items()}
+              for row in rows if row["osis_id"] in chosen
+          ]
+          assert selected == expected
+
+          api = load_boundary_api(Path("build/canonical-graph/2021"))
+          for label, row in samples.items():
+              assert row["slot_status"] == "comparable"
+              cut = row["bhsa_cut_after_slot"]
+              verse_slots = set(api.E.oslots.s(row["verse_node"]))
+              if label == "yes":
+                  syntax_nodes = [int(n) for n in row["phrase_nodes"].split(";")]
+                  assert syntax_nodes
+                  for n in syntax_nodes:
+                      assert api.F.otype.v(n) == "phrase"
+                      slots = set(api.E.oslots.s(n))
+                      assert slots <= verse_slots and max(slots) == cut
+              else:
+                  # Genuine negative: independently inspect *all* original
+                  # BHSA phrase nodes, including gapped and cross-verse ones.
+                  assert not any(
+                      set(api.E.oslots.s(node)) <= verse_slots
+                      and max(api.E.oslots.s(node)) == cut
+                      for node in api.F.otype.s("phrase")
+                      if api.E.oslots.s(node)
+                  )
+          print("Independently verified real positive/negative and selected TSV")
           PY
