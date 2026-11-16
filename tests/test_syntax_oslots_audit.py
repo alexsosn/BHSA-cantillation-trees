@@ -100,3 +100,21 @@ def test_section_display_name_does_not_replace_original_bhsa_book_code():
     api.L = SimpleNamespace(u=lambda node, otype: (100,) if otype == "book" else ())
     api.T = SimpleNamespace(sectionFromNode=lambda node: ("Numbers", 1, 1))
     assert _verse_osis_labels(api)[20] == "Num.1.1"
+
+
+def test_cross_verse_example_names_both_source_verses():
+    result = audit_syntax_oslots(
+        fixture_api(), verse_labels={20: "Gen.1.1", 21: "Gen.1.2"}
+    )
+    sample = next(item for item in result["examples"]["cross_verse"] if item["node"] == 12)
+    assert sample["verse_nodes"] == [20, 21]
+    assert sample["osis_ids"] == ["Gen.1.1", "Gen.1.2"]
+
+
+def test_gapped_sample_exposes_complete_exact_slot_runs():
+    result = audit_syntax_oslots(
+        fixture_api(), verse_labels={20: "Gen.1.1", 21: "Gen.1.2"}
+    )
+    sample = next(item for item in result["examples"]["gapped"] if item["node"] == 9)
+    assert sample["slot_ranges"] == "1-2,4"
+    assert sample["slot_count"] == 3
