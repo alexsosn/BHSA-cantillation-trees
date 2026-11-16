@@ -33,7 +33,8 @@ def source(name, slots, path, accent):
 
 
 def save_syntax_graph(
-    tmp_path, *, alignment="exact", source_slots=((1, 2), (3,), (4,), (5,))
+    tmp_path, *, alignment="exact", source_slots=((1, 2), (3,), (4,), (5,)),
+    psalm_split=False,
 ):
     tf = pytest.importorskip("tf.fabric")
     core, derived = tmp_path / "core", tmp_path / "derived"
@@ -76,7 +77,8 @@ def save_syntax_graph(
         17, project_graph("Gen.1.1", alignments, units, build_tree(units)), alignments
     )
     singleton_words = [
-        source("a", (6,), None, "Munnach"),
+        source("a", (6,), "1" if psalm_split else None,
+               "Atnach" if psalm_split else "Munnach"),
         source("b", (7,), "0", "Sof Pasuq"),
     ]
     singleton_units = make_units(singleton_words)
@@ -239,3 +241,17 @@ def test_corrupt_nonselected_persisted_cut_fails_atomically(tmp_path):
         ])
     assert output.read_bytes() == b"prior verified export\n"
     assert not list(tmp_path.glob(".previous.jsonl.*.tmp"))
+
+
+def test_cross_verse_syntax_endpoint_is_not_falsely_counted_in_second_verse(tmp_path):
+    # Both original syntax node 9 (clause) and 14 (phrase) occupy
+    # {5, 6}, spanning Gen.1.1 and Ps.117.1. Psalm has a real cut after 6.
+    graph = save_syntax_graph(tmp_path, psalm_split=True)
+    rows = list(iter_syntax_boundary_rows(load_boundary_api(graph)))
+    ps = next(row for row in rows if row["osis_id"] == "Ps.117.1")
+    assert ps["slot_status"] == "comparable"
+    assert ps["bhsa_cut_after_slot"] == 6
+    assert ps["ends_phrase"] is False
+    assert ps["phrase_nodes"] == ""
+    assert ps["ends_clause"] is False
+    assert ps["clause_nodes"] == ""
