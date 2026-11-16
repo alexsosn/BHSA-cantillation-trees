@@ -126,3 +126,22 @@ def test_pairwise_crossing_example_preserves_both_complete_slot_sets():
     )
     sample = next(item for item in result["examples"]["crossing"] if item["nodes"] == [9, 10])
     assert sample["slot_ranges"] == ["1-2,4", "2-3"]
+
+
+def test_exhausted_pair_example_budget_avoids_eager_slot_rendering(monkeypatch):
+    import scripts.audit_syntax_oslots as audit
+
+    original = audit._slot_ranges
+    calls = 0
+
+    def counted(slots):
+        nonlocal calls
+        calls += 1
+        return original(slots)
+
+    monkeypatch.setattr(audit, "_slot_ranges", counted)
+    result = audit.audit_syntax_oslots(fixture_api(), max_examples=0)
+    # At zero examples only the per-node descriptions may render slots.
+    # Pairwise comparisons must never format slot runs just to discard them.
+    assert calls == result["original_syntax_nodes"]
+    assert all(not examples for examples in result["examples"].values())
