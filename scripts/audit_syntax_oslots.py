@@ -31,6 +31,23 @@ def _sample(target: list[dict], example: dict, limit: int) -> None:
         target.append(example)
 
 
+def _slot_ranges(slots: frozenset[int]) -> str:
+    """Losslessly render exact source slot sets as inclusive consecutive runs."""
+    ordered = sorted(slots)
+    if not ordered:
+        return ""
+    runs = []
+    first = last = ordered[0]
+    for slot in ordered[1:]:
+        if slot == last + 1:
+            last = slot
+        else:
+            runs.append(str(first) if first == last else f"{first}-{last}")
+            first = last = slot
+    runs.append(str(first) if first == last else f"{first}-{last}")
+    return ",".join(runs)
+
+
 def _describe(node: int, kind: str, slots: frozenset[int], osis: str) -> dict:
     order = sorted(slots)
     return {
@@ -40,6 +57,7 @@ def _describe(node: int, kind: str, slots: frozenset[int], osis: str) -> dict:
         "first_slot": order[0],
         "last_slot": order[-1],
         "slot_count": len(slots),
+        "slot_ranges": _slot_ranges(slots),
         "slot_sample": order[:12],
     }
 
@@ -116,6 +134,11 @@ def audit_syntax_oslots(
                 _sample(examples["unassigned_slots"], sample, max_examples)
                 continue
             if len(owners) != 1:
+                ordered_owners = sorted(owners)
+                sample["verse_nodes"] = ordered_owners
+                sample["osis_ids"] = [
+                    labels.get(verse, str(verse)) for verse in ordered_owners
+                ]
                 stats["cross_verse"] += 1
                 _sample(stats["cross_verse_examples"], sample, max_examples)
                 _sample(examples["cross_verse"], sample, max_examples)
