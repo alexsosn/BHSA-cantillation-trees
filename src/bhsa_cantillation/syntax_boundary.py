@@ -63,6 +63,10 @@ def _original_syntax_endpoint_index(api):
     is still defined; gaps must never be filled to infer set containment.
     """
     E, F = api.E, api.F
+    syntax_nodes = {kind: F.otype.s(kind) for kind in SYNTAX_TYPES}
+    for kind, nodes in syntax_nodes.items():
+        if not nodes:
+            raise ValueError(f"Missing original BHSA syntax layer: {kind}")
     slot_owner: dict[int, int] = {}
     for verse in F.otype.s("verse"):
         slots = E.oslots.s(verse)
@@ -78,8 +82,8 @@ def _original_syntax_endpoint_index(api):
         kind: Counter({"missing_slots": 0, "unassigned_slots": 0, "cross_verse": 0})
         for kind in SYNTAX_TYPES
     }
-    for kind in SYNTAX_TYPES:
-        for node in F.otype.s(kind):
+    for kind, nodes in syntax_nodes.items():
+        for node in nodes:
             slots = frozenset(E.oslots.s(node))
             if not slots:
                 exclusions[kind]["missing_slots"] += 1
