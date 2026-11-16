@@ -272,6 +272,58 @@ BHSA segments, while `Ps.36.1` has no root cut. The pinned E2E test also
 selects a genuine mismatch from the full exported data and verifies it
 independently through the CLI.
 
+## Compare saved cantillation cuts with BHSA syntax endings
+
+The read-only `compare-syntax` command compares **every persisted
+`cant_phrase` split** to the final occupied BHSA word slot of the original
+`phrase`, `phrase_atom`, `clause_atom` and `clause` objects. No new TF
+edges, syntax nodes or reconstructed cantillation trees are introduced.
+
+```bash
+bhsa-cantillation compare-syntax \
+  --graph build/canonical-graph/2021 \
+  --format jsonl --output build/syntax-endings.jsonl
+bhsa-cantillation compare-syntax \
+  --graph build/canonical-graph/2021 \
+  --format tsv --verse Gen.1.1 --verse Gen.7.11 \
+  --output build/syntax-examples.tsv
+```
+
+One row represents one saved cantillation phrase cut. Rows contain
+`cut_after_word_index` (the **1-based MorphHB source-word index**),
+`bhsa_cut_after_slot` (the **original BHSA numeric word slot**, when uniquely
+projectable), the two exact child slot sets, `slot_status`, and four boolean
+`ends_*` fields with the complete semicolon-delimited list of matching
+original BHSA syntax node IDs (`phrase_nodes`, `phrase_atom_nodes`,
+`clause_atom_nodes`, `clause_nodes`). Distinct syntax nodes can end at
+the same slot. Ranges use inclusive notation, e.g. `1-3,5`; a source-word
+index must never be interpreted as a BHSA slot.
+
+`slot_status=comparable` requires `alignment=exact` plus two **disjoint,
+contiguous, adjacent and forward-ordered** original BHSA child slot sets.
+`fuzzy_alignment` and `ambiguous_slots` are **inconclusive**, with all
+`ends_*` values `null` in JSONL or empty in TSV. A comparable `ends_*=false`
+means no qualifying original BHSA node of that type ends at the cut slot.
+A gapped functional `phrase` or `clause` is eligible by its **last
+actually occupied slot** without filling its internal gaps. Syntax nodes
+that span verses, have no slots, or reference unassigned word slots are
+excluded from candidate endings and counted separately.
+
+The JSON summary distinguishes `cuts`, `comparable`,
+`status_counts`, and `matches_by_type`. A type's match count counts
+**cantillation cuts**, not the possibly larger number of cofinal BHSA syntax
+nodes. `syntax_node_exclusions_global` reports original syntax-node
+exclusions over the **whole loaded BHSA graph**, even for a selected verse,
+and is not part of the cut denominator. As with `boundaries`, repeated
+`--verse` selects exact OSIS IDs in graph order, the full persisted graph is
+validated, a known singleton verse has zero rows, and validation failures
+leave the prior output untouched.
+
+These are descriptive end-boundary coincidences, not independent proof of
+syntactic or prosodic validity. The `half_verse` division belongs to a
+different BHSA structural tier. See the exact-slot-set research record in
+[issue #21](https://github.com/alexsosn/BHSA-cantillation-trees/issues/21).
+
 ## Export and ASCII rendering
 
 Export the whole module as JSON Lines, or select verses into a JSON array:
