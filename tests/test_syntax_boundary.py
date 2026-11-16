@@ -34,7 +34,7 @@ def source(name, slots, path, accent):
 
 def save_syntax_graph(
     tmp_path, *, alignment="exact", source_slots=((1, 2), (3,), (4,), (5,)),
-    psalm_split=False,
+    psalm_split=False, missing_clause_layer=False,
 ):
     tf = pytest.importorskip("tf.fabric")
     core, derived = tmp_path / "core", tmp_path / "derived"
@@ -48,6 +48,10 @@ def save_syntax_graph(
         15: "phrase_atom", 16: "phrase_atom",
         17: "verse", 18: "verse",
     }
+    if missing_clause_layer:
+        # Preserve original numeric IDs but remove the required 'clause' type
+        # from the BHSA warp. Treating this as zero matches is unsound.
+        types[8] = types[9] = "clause_atom"
     spans = {
         8: {1, 2, 3}, 9: {5, 6},
         10: {1, 2, 3},
@@ -255,3 +259,16 @@ def test_cross_verse_syntax_endpoint_is_not_falsely_counted_in_second_verse(tmp_
     assert ps["phrase_nodes"] == ""
     assert ps["ends_clause"] is False
     assert ps["clause_nodes"] == ""
+
+
+def test_missing_original_syntax_layer_fails_closed_and_preserves_output(tmp_path):
+    graph = save_syntax_graph(tmp_path, missing_clause_layer=True)
+    output = tmp_path / "previous.jsonl"
+    output.write_bytes(b"prior verified export\n")
+    with pytest.raises(ValueError, match="Missing original BHSA syntax layer.*clause"):
+        main([
+            "compare-syntax", "--graph", str(graph),
+            "--output", str(output),
+        ])
+    assert output.read_bytes() == b"prior verified export\n"
+    assert not list(tmp_path.glob(".previous.jsonl.*.tmp"))
