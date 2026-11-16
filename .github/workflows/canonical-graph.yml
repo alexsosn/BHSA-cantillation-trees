@@ -9,6 +9,8 @@ on:
       - "src/bhsa_cantillation/boundaries.py"
       - "tests/test_boundaries.py"
       - "tests/test_graph*.py"
+      - "scripts/audit_syntax_oslots.py"
+      - "tests/test_syntax_oslots_audit.py"
   workflow_dispatch:
 
 permissions:
@@ -50,6 +52,39 @@ jobs:
             structure/OshbVerse/Script
           filter: blob:none
           persist-credentials: false
+
+      - name: Research gate - audit pinned BHSA syntax oslots topology
+        run: |
+          python scripts/audit_syntax_oslots.py \
+            --bhsa inputs/bhsa/tf/2021 \
+            --bhsa-commit 4db00e2157915495e1a4d3d57e41223df24775da \
+            --output build/syntax-oslots-audit.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("build/syntax-oslots-audit.json").read_text())
+          assert data["verse_count"] == 23213
+          assert {kind: entry["nodes"] for kind, entry in data["types"].items()} == {
+              "clause": 88131, "clause_atom": 90704,
+              "phrase": 253203, "phrase_atom": 267532,
+          }
+          for kind, entry in data["types"].items():
+              assert entry["nodes"] == (
+                  entry["assigned_to_verse"] + entry["cross_verse"]
+                  + entry["unassigned_slots"] + entry["missing_slots"]
+              ), (kind, entry)
+          print("Pinned syntax oslots membership and denominators validated")
+          print("Pairwise relation counts:", data["relations"])
+          print("Real crossing examples:", data["examples"]["crossing"])
+          print("Real discontinuous examples:", data["examples"]["gapped"])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-syntax-oslots-audit
+          path: build/syntax-oslots-audit.json
+          retention-days: 14
 
       - name: Build full derived cantillation graph and verify all 23,213 trees
         run: |
