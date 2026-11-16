@@ -169,6 +169,25 @@ def audit_syntax_oslots(
     }
 
 
+def _verse_osis_labels(api) -> dict[int, str]:
+    """Use original Latin BHSA book feature, not localized section display names."""
+    bhsa_to_osis = {bhsa: osis for osis, bhsa in BOOKS}
+    labels: dict[int, str] = {}
+    for node in api.F.otype.s("verse"):
+        section = api.T.sectionFromNode(node)
+        if not section or len(section) != 3:
+            raise ValueError(f"No BHSA section identity for verse {node}")
+        _display_book, chapter, verse = section
+        book_nodes = api.L.u(node, otype="book")
+        if len(book_nodes) != 1:
+            raise ValueError(f"Expected one original BHSA book node above verse {node}")
+        book = api.F.book.v(book_nodes[0])
+        if book not in bhsa_to_osis:
+            raise ValueError(f"Unknown original BHSA book code at verse {node}: {book}")
+        labels[node] = f"{bhsa_to_osis[book]}.{chapter}.{verse}"
+    return labels
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bhsa", required=True, type=Path, help="pinned BHSA tf/2021")
@@ -184,17 +203,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     if api is None:
         raise RuntimeError("Unable to load original BHSA syntax warp")
-    bhsa_to_osis = {bhsa: osis for osis, bhsa in BOOKS}
-    labels = {}
-    for node in api.F.otype.s("verse"):
-        section = api.T.sectionFromNode(node)
-        if not section or len(section) != 3:
-            raise ValueError(f"No BHSA section identity for verse {node}")
-        book, chapter, verse = section
-        if book not in bhsa_to_osis:
-            raise ValueError(f"Unknown BHSA book name at verse {node}: {book}")
-        labels[node] = f"{bhsa_to_osis[book]}.{chapter}.{verse}"
-
+    labels = _verse_osis_labels(api)
     result = audit_syntax_oslots(api, verse_labels=labels, max_examples=args.max_examples)
     result["bhsa_commit"] = args.bhsa_commit
     args.output.parent.mkdir(parents=True, exist_ok=True)
