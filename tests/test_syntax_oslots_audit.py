@@ -89,3 +89,14 @@ def test_duplicate_word_slot_owner_is_rejected():
     api.E.oslots.s = lambda node: [6, 7, 8] if node == 21 else old(node)
     with pytest.raises(ValueError, match="multiple verses"):
         audit_syntax_oslots(api)
+
+
+def test_section_display_name_does_not_replace_original_bhsa_book_code():
+    """T.sectionFromNode may display 'Numbers', but F.book uses 'Numeri'."""
+    from scripts.audit_syntax_oslots import _verse_osis_labels
+
+    api = fixture_api()
+    api.F.book = SimpleNamespace(v=lambda node: "Numeri")
+    api.L = SimpleNamespace(u=lambda node, otype: (100,) if otype == "book" else ())
+    api.T = SimpleNamespace(sectionFromNode=lambda node: ("Numbers", 1, 1))
+    assert _verse_osis_labels(api)[20] == "Num.1.1"
