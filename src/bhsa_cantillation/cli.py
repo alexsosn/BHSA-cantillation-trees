@@ -52,6 +52,16 @@ def parser() -> argparse.ArgumentParser:
         help="select an exact OSIS verse ID; repeat for multiple verses",
     )
     halves.add_argument("--output", type=Path, required=True)
+    syntax = commands.add_parser(
+        "compare-syntax", help="compare saved cantillation cuts with BHSA syntactic ends"
+    )
+    syntax.add_argument("--graph", type=Path, required=True, help="derived graph TF directory")
+    syntax.add_argument("--format", choices=("jsonl", "tsv"), default="jsonl")
+    syntax.add_argument(
+        "--verse", action="append", default=[], metavar="OSIS_ID",
+        help="select an exact OSIS verse ID; repeat for multiple verses",
+    )
+    syntax.add_argument("--output", type=Path, required=True)
     return root
 
 
@@ -95,6 +105,16 @@ def main(argv: list[str] | None = None) -> int:
         from .half_verse import write_half_verse_rows
 
         stats = write_half_verse_rows(
+            load_boundary_api(args.graph), args.output,
+            fmt=args.format, verse_ids=args.verse or None,
+        )
+        print(json.dumps({**stats, "output": str(args.output)}, sort_keys=True))
+        return 0
+    if args.command == "compare-syntax":
+        from .boundaries import load_boundary_api
+        from .syntax_boundary import write_syntax_boundary_rows
+
+        stats = write_syntax_boundary_rows(
             load_boundary_api(args.graph), args.output,
             fmt=args.format, verse_ids=args.verse or None,
         )
