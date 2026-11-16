@@ -172,6 +172,7 @@ def audit_syntax_oslots(
                     "nodes": [a, b],
                     "types": [kind_a, kind_b],
                     "slots": [sorted(slots_a)[:12], sorted(slots_b)[:12]],
+                    "slot_ranges": [_slot_ranges(slots_a), _slot_ranges(slots_b)],
                 }, max_examples)
             if max(slots_a) == max(slots_b):
                 counts["shared_end_slot"] += 1
