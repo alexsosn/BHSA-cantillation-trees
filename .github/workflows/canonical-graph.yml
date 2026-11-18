@@ -428,3 +428,109 @@ jobs:
                   )
           print("Independently verified real positive/negative and selected TSV")
           PY
+
+      - name: E2E original-slot-set syntax relations with real crossing
+        run: |
+          # Run the documented end-user command on 31 genuine Genesis verses.
+          verses=()
+          for n in $(seq 1 31); do
+            verses+=(--verse "Gen.1.$n")
+          done
+          bhsa-cantillation syntax-relations \
+            --graph build/canonical-graph/2021 \
+            "${verses[@]}" --format jsonl \
+            --output build/syntax-relations.jsonl > build/syntax-relations-summary.json
+          bhsa-cantillation syntax-relations \
+            --graph build/canonical-graph/2021 \
+            "${verses[@]}" --format jsonl \
+            --output build/syntax-relations-again.jsonl
+          cmp build/syntax-relations.jsonl build/syntax-relations-again.jsonl
+          python - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          from bhsa_cantillation.boundaries import load_boundary_api
+
+          rows = [
+              json.loads(line) for line in
+              Path("build/syntax-relations.jsonl").read_text(encoding="utf-8").splitlines()
+          ]
+          summary = json.loads(
+              Path("build/syntax-relations-summary.json").read_text(encoding="utf-8")
+          )
+          assert rows
+          assert all(row["osis_id"].startswith("Gen.1.") for row in rows)
+          assert all(row["verse_node"] in range(1414389, 1437602) for row in rows)
+          phrases = {}
+          for row in rows:
+              key = row["phrase_node"]
+              assert key not in phrases or phrases[key] == row["slot_status"]
+              phrases[key] = row["slot_status"]
+          assert len(phrases) == summary["cuts"]
+          assert Counter(phrases.values()) == summary["status_counts"]
+          actual = [row for row in rows if row["relation"] is not None]
+          assert len(actual) == summary["comparisons"]
+          assert Counter(row["relation"] for row in actual) == summary["relation_counts"]
+          assert summary["syntax_node_exclusions_global"]["phrase"]["cross_verse"] == 15
+          assert summary["syntax_node_exclusions_global"]["clause"]["cross_verse"] == 50
+
+          api = load_boundary_api(Path("build/canonical-graph/2021"))
+          for row in actual:
+              assert row["slot_status"] == "comparable"
+              assert api.F.otype.v(row["phrase_node"]) == "cant_phrase"
+              assert api.F.otype.v(row["syntax_node"]) == row["syntax_type"]
+              cant = set(api.E.oslots.s(row["phrase_node"]))
+              syntax = set(api.E.oslots.s(row["syntax_node"]))
+              assert cant and syntax
+              assert cant <= set(api.E.oslots.s(row["verse_node"]))
+              assert syntax <= set(api.E.oslots.s(row["verse_node"]))
+              # Independently derive set logic from saved original oslots,
+              # not from the implementation's classifier or range parser.
+              if cant == syntax:
+                  expected = "exact"
+              elif cant < syntax:
+                  expected = "inside"
+              elif syntax < cant:
+                  expected = "contains"
+              elif not cant.isdisjoint(syntax):
+                  expected = "crossing"
+              else:
+                  expected = "disjoint"
+              assert row["relation"] == expected, row
+
+          crossings = [row for row in actual if row["relation"] == "crossing"]
+          assert crossings, "No real cantillation/BHSA crossing in Genesis 1 sample"
+          one = crossings[0]
+          Path("build/real-syntax-crossing-osis.txt").write_text(
+              one["osis_id"] + "\n", encoding="utf-8"
+          )
+          print("Verified original BHSA relations:", len(actual),
+                "pairs; real crossing", one["osis_id"],
+                one["phrase_id"], one["syntax_node"])
+          PY
+          crossing_osis="$(cat build/real-syntax-crossing-osis.txt)"
+          bhsa-cantillation syntax-relations \
+            --graph build/canonical-graph/2021 \
+            --verse "$crossing_osis" --verse "$crossing_osis" \
+            --format tsv --output build/real-syntax-crossing.tsv
+          python - <<'PY'
+          import csv
+          import json
+          from pathlib import Path
+
+          osis = Path("build/real-syntax-crossing-osis.txt").read_text().strip()
+          expected = [
+              {key: "" if value is None else str(value) for key, value in row.items()}
+              for row in map(json.loads, Path("build/syntax-relations.jsonl")
+                             .read_text(encoding="utf-8").splitlines())
+              if row["osis_id"] == osis
+          ]
+          with Path("build/real-syntax-crossing.tsv").open(
+              encoding="utf-8", newline=""
+          ) as handle:
+              actual = list(csv.DictReader(handle, delimiter="\t"))
+          assert actual == expected
+          assert any(row["relation"] == "crossing" for row in actual)
+          print("Selected original-slot crossing verified via end-user TSV CLI", osis)
+          PY
