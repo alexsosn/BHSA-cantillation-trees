@@ -61,3 +61,14 @@ def test_published_notes_no_longer_claim_to_be_unpublished_candidate():
     assert "not yet a published" not in notes
     assert "release candidate, not" not in notes
     assert "not evidence that a GitHub tag" not in notes
+
+
+def test_published_notes_link_to_versioned_readme_and_preserve_source_credit():
+    notes = NOTES.read_text(encoding="utf-8")
+    assert (
+        "https://github.com/alexsosn/BHSA-cantillation-trees/"
+        "blob/v0.1.0/README.md#researcher-quickstart-pinned-2021-corpus"
+    ) in notes
+    assert "CC BY 4.0" in notes
+    assert "Open Scriptures Hebrew Bible" in notes
+    assert "NOTICE" in notes
