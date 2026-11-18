@@ -20,11 +20,10 @@ def quickstart() -> str:
 
 def documented_command(command: str) -> list[str]:
     text = re.sub(r"\\\n[ \t]*", " ", quickstart())
-    matches = re.findall(
-        rf"^bhsa-cantillation {re.escape(command)}(?: [^\\n]*)?$",
-        text,
-        flags=re.MULTILINE,
-    )
+    matches = [
+        line for line in text.splitlines()
+        if line.startswith(f"bhsa-cantillation {command} ")
+    ]
     assert len(matches) == 1, (command, matches)
     return shlex.split(matches[0])
 
