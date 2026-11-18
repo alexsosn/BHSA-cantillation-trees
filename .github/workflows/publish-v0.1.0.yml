@@ -1,0 +1,95 @@
+name: publish-v0.1.0
+
+# One-shot first-release trigger. Can also be dispatched again for diagnosis;
+# a pre-existing tag or release blocks accidental replacement.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/publish-v0.1.0.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-v0.1.0
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    # Reuse the full pinned-source / original BHSA oslots E2E rather than
+    # publishing based only on unit tests or a lightweight-package smoke.
+    uses: ./.github/workflows/canonical-graph.yml
+    permissions:
+      contents: read
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Verify release identity and reject existing tag/release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import tomllib
+
+          with Path("pyproject.toml").open("rb") as stream:
+              assert tomllib.load(stream)["project"]["version"] == "0.1.0"
+          assert "version: 0.1.0" in Path("CITATION.cff").read_text(encoding="utf-8")
+          assert Path("docs/RELEASE_NOTES_0.1.0.md").is_file()
+          PY
+          if gh release view v0.1.0 >/dev/null 2>&1; then
+            echo "Release v0.1.0 already exists; refusing overwrite" >&2
+            exit 1
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v0.1.0" >/dev/null 2>&1; then
+            echo "Tag v0.1.0 exists; refusing to retarget it" >&2
+            exit 1
+          fi
+
+      - name: Build and smoke both installable distributions
+        run: |
+          python -m pip install build
+          python -m build --sdist --wheel
+          test "$(find dist -maxdepth 1 -name '*.whl' | wc -l)" -eq 1
+          test "$(find dist -maxdepth 1 -name '*.tar.gz' | wc -l)" -eq 1
+
+          python -m venv .wheel-smoke
+          .wheel-smoke/bin/python -m pip install dist/*.whl
+          .wheel-smoke/bin/bhsa-cantillation --help > /dev/null
+          for command in build-graph boundaries compare-halves compare-syntax syntax-relations; do
+            .wheel-smoke/bin/bhsa-cantillation "$command" --help > /dev/null
+          done
+
+          python -m venv .sdist-smoke
+          .sdist-smoke/bin/python -m pip install dist/*.tar.gz
+          .sdist-smoke/bin/bhsa-cantillation --help > /dev/null
+          (
+            cd dist
+            sha256sum -- *.whl *.tar.gz > SHA256SUMS.txt
+          )
+
+      - name: Create draft release with verified artifacts, then publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create v0.1.0 dist/*.whl dist/*.tar.gz dist/SHA256SUMS.txt \
+            --draft --title "BHSA cantillation trees v0.1.0" \
+            --notes-file docs/RELEASE_NOTES_0.1.0.md \
+            --target "$GITHUB_SHA"
+          gh release edit v0.1.0 --draft=false
+          gh release view v0.1.0 --json tagName,isDraft,assets \
+            --jq '.tagName == "v0.1.0" and (.isDraft == false) and ((.assets | length) == 3)' \
+            | grep -qx true
