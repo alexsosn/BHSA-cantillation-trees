@@ -358,7 +358,7 @@ def test_singleton_grouped_summary_is_empty_and_fixed_jsonl_tsv_stays_unchanged(
     ]) == 0
     assert json.loads(capsys.readouterr().out)["by_system_accent"] == []
     with tsv.open(encoding="utf-8", newline="") as stream:
-        assert list(csv.DictReader(stream, delimiter="\\t")) == []
+        assert list(csv.DictReader(stream, delimiter="\t")) == []
 
 
 @pytest.mark.parametrize(
