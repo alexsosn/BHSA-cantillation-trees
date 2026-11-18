@@ -107,14 +107,16 @@ def test_valid_book_with_absent_chapter_fails_closed(tmp_path, command):
 
 
 def test_default_unfiltered_behavior_preserved_and_relations_still_require_selection(
-    tmp_path, capsys
+    tmp_path
 ):
     graph = save_syntax_graph(tmp_path)
     rows = _export("compare-syntax", graph, tmp_path / "all.jsonl")
     assert len(rows) == 3
-    assert main([
-        "syntax-relations", "--graph", str(graph), "--output", str(tmp_path / "bad.jsonl")
-    ]) == 2  # parser-level error must be raised before main can return
+    with pytest.raises(SystemExit) as error:
+        main([
+            "syntax-relations", "--graph", str(graph), "--output", str(tmp_path / "bad.jsonl")
+        ])
+    assert error.value.code == 2  # no unbounded pairwise relation export
 
 
 def test_parser_book_choices_and_chapter_dependence():
