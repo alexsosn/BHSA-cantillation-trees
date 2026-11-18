@@ -1,6 +1,13 @@
 name: canonical-graph-integration
 
 on:
+  workflow_call:
+    inputs:
+      concurrency_scope:
+        description: Distinguish release verification from standalone PR graph checks
+        required: false
+        type: string
+        default: standalone
   pull_request:
     paths:
       - ".github/workflows/canonical-graph.yml"
@@ -21,7 +28,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: canonical-graph-${{ github.event.pull_request.number || github.ref }}
+  group: canonical-graph-${{ inputs.concurrency_scope || 'standalone' }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:

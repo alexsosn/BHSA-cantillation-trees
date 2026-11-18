@@ -24,7 +24,8 @@ def test_release_notes_exist_and_match_package_and_citation_metadata():
     assert NOTES.is_file()
     notes = NOTES.read_text(encoding="utf-8")
     assert f"v{version}" in notes
-    assert "candidate" in notes.lower()
+    assert "# v0.1.0 — release notes" in notes
+    assert "candidate" not in notes.lower()
     assert "23,213" in notes
     assert "142,534" in notes
     assert "Gen.1.7#p3-6" in notes

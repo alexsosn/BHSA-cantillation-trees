@@ -1,9 +1,7 @@
-# v0.1.0 — release candidate notes
+# v0.1.0 — release notes
 
-**Status:** release candidate, not yet a published GitHub release or a tagged
-artifact. This document describes code available on `main` after the
-cantillation/syntax exporter and researcher quickstart merges. A GitHub
-release should be published only after the remaining verification gate passes.
+The release distributes the Python package (wheel and source archive) together
+with source-pinned instructions for regenerating the full BHSA cantillation graph.
 
 ## What researchers can use
 
@@ -31,7 +29,7 @@ The `bhsa-cantillation` command provides:
   `exact`, `inside`, `contains`, `crossing` or `disjoint`.
   A `--verse` selection is required to bound this pairwise report.
 
-The README's [researcher quickstart](../README.md#researcher-quickstart-pinned-2021-corpus)
+The [researcher quickstart](https://github.com/alexsosn/BHSA-cantillation-trees/blob/v0.1.0/README.md#researcher-quickstart-pinned-2021-corpus)
 provides the copyable source checkout, install, graph-build and initial
 Genesis 1:1 analysis workflow. Use the end-boundary report for a quick
 question about a cantillation cut, and `syntax-relations` for exact
@@ -67,7 +65,7 @@ constituent comparisons.
   IDs have different coordinate systems. Equal numeric values do not
   imply they are interchangeable.
 - Named scholarly colometry profiles such as **de Hoop 2000** and
-  **Park 2013** are **not implemented** in this release candidate.
+  **Park 2013** are **not implemented** in v0.1.0.
   Contextual boundary strength/D-level research features and automatic
   interpretive prosodic segmentation are likewise not implemented.
   The outputs are descriptive source-derived comparisons, not ground truth
@@ -76,15 +74,19 @@ constituent comparisons.
   checkouts. The command rejects a nonempty output folder to prevent
   silently reusing stale derived TF files.
 
-## Candidate release verification
+## Source credit and licensing
 
-Before publishing v0.1.0, verify in an isolated environment that
-`python -m pip install .` succeeds and the installed
-`bhsa-cantillation` console script exposes `build-graph`,
-`boundaries`, `compare-halves`, `compare-syntax` and
-`syntax-relations` help. Confirm a full pinned graph build and the
-two researcher-facing E2E cases against the candidate commit, then
-review the source provenance, exclusions and documentation independently.
+The MorphHB source data is licensed under **CC BY 4.0**. Required attribution:
+"Original work of the Open Scriptures Hebrew Bible available at
+https://github.com/openscriptures/morphhb". See the repository's
+[NOTICE](https://github.com/alexsosn/BHSA-cantillation-trees/blob/v0.1.0/NOTICE).
+The BHSA source repository includes an MIT license. Source copyrights and
+licenses remain those of their respective projects.
 
-This file is a release-candidate record, not evidence that a GitHub tag,
-archive or binary dataset has already been published.
+## Release verification
+
+The publishing workflow requires a clean non-editable wheel/source install,
+the installed console-script help commands, and a successful complete pinned
+BHSA corpus integration run before creating the version tag. The source data
+and full derived TF graph are not included in the binary wheel. Every released
+archive is accompanied by SHA-256 checksums for download verification.

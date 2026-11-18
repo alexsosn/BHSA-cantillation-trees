@@ -9,9 +9,9 @@ reconstructs a prosodic tree for every verse.
 The generated module covers the complete Hebrew Bible, including the poetic
 accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 
-Release-candidate scope, pinned results and limitations are listed in
-[v0.1.0 release notes](docs/RELEASE_NOTES_0.1.0.md). These are candidate
-notes; publishing a GitHub release remains a separate verified step.
+The supported v0.1.0 workflows, corpus pins, and limitations are listed in
+[release notes](docs/RELEASE_NOTES_0.1.0.md). The full BHSA-derived graph is
+built from the pinned upstream datasets and is not bundled with the wheel.
 
 ## Researcher quickstart (pinned 2021 corpus)
 
@@ -24,6 +24,7 @@ the repository's full-corpus CI. Commands below use a POSIX shell
 ```bash
 git clone https://github.com/alexsosn/BHSA-cantillation-trees.git
 cd BHSA-cantillation-trees
+git checkout v0.1.0
 python -m venv .venv
 . .venv/bin/activate
 python -m pip install -e .
