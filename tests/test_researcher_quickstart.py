@@ -82,3 +82,16 @@ def test_quickstart_explains_researcher_decision_boundaries():
         assert key in text
     assert "MorphHB" in text and "BHSA" in text
     assert "OSIS" in text
+
+
+def test_documented_input_revisions_match_pinned_integration_workflow():
+    workflow = (
+        Path(__file__).resolve().parents[1]
+        / ".github/workflows/canonical-graph.yml"
+    ).read_text(encoding="utf-8")
+    assert f"ref: {BHSA_COMMIT}" in workflow
+    assert f"ref: {MORPHHB_COMMIT}" in workflow
+    assert "path: inputs/bhsa" in workflow
+    assert "path: inputs/morphhb" in workflow
+    assert "sparse-checkout: tf/2021" in workflow
+    assert "structure/OshbVerse/Script" in workflow
