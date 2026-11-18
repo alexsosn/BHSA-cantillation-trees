@@ -186,3 +186,43 @@ def test_syntax_relations_requires_bounded_verse_selection(tmp_path):
         main(["syntax-relations", "--graph", str(graph),
               "--output", str(tmp_path / "all.jsonl")])
     assert error.value.code == 2
+
+
+def test_saved_tf_inside_is_strict_and_directional(tmp_path):
+    # The same original clause contains both child cantillation phrases,
+    # and equals their root; all other original nodes remain unchanged.
+    api = load_boundary_api(save_syntax_graph(tmp_path, containing_clause=True))
+    matches = {
+        r["phrase_id"]: r["relation"]
+        for r in iter_syntax_relation_rows(api, verse_ids=["Gen.1.1"])
+        if r["syntax_node"] == 8
+    }
+    assert matches == {
+        "Gen.1.1#p1-2": "inside",
+        "Gen.1.1#p1-4": "exact",
+        "Gen.1.1#p3-4": "inside",
+    }
+
+
+def test_corrupted_nonselected_saved_graph_rejects_atomic_relation_export(tmp_path):
+    tf = pytest.importorskip("tf.fabric")
+    graph = save_syntax_graph(tmp_path, psalm_split=True)
+    api = load_boundary_api(graph)
+    psalm_root = api.E.cant_root.f(18)[0]
+    genesis_root = api.E.cant_root.f(17)[0]
+    output = tmp_path / "prior.jsonl"
+    output.write_bytes(b"prior validated report\n")
+    # Corrupt the *unselected* Psalm's cut target, leaving selected Genesis
+    # untouched. A consumer that validates only selected verses would accept.
+    assert tf.Fabric(locations=str(graph), silent="deep").save(
+        edgeFeatures={"cant_cut_after": {psalm_root: {genesis_root}}},
+        metaData={"cant_cut_after": {"valueType": "str"}},
+        silent="deep",
+    )
+    with pytest.raises(ValueError, match="cut|phrase"):
+        main([
+            "syntax-relations", "--graph", str(graph), "--verse", "Gen.1.1",
+            "--output", str(output),
+        ])
+    assert output.read_bytes() == b"prior validated report\n"
+    assert not list(tmp_path.glob(".prior.jsonl.*.tmp"))
