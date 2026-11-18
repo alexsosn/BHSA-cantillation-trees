@@ -239,6 +239,43 @@ defined as zero. `cantillation_longest_ladder` counts consecutive internal
 nodes where exactly one child is a leaf; `cantillation_longest_accent_run`
 includes both internal nodes and leaves.
 
+## Select a book or chapter (post-v0.1.0)
+
+On the development branch, the four saved-graph exports (`boundaries`,
+`compare-halves`, `compare-syntax`, and `syntax-relations`) also accept
+a canonical OSIS `--book` and optional positive `--chapter`. This change
+is **not part of the tagged v0.1.0 release** and will be included in a
+subsequent version.
+
+For example, instead of listing all 31 verses in Genesis 1:
+
+```bash
+bhsa-cantillation compare-syntax \
+  --graph build/canonical-graph/2021 \
+  --book Gen --chapter 1 --format tsv \
+  --output build/genesis-1-syntax.tsv
+bhsa-cantillation syntax-relations \
+  --graph build/canonical-graph/2021 \
+  --book Gen --chapter 1 --format jsonl \
+  --output build/genesis-1-relations.jsonl
+# A book-wide boundary export (includes all Psalm chapters):
+bhsa-cantillation boundaries \
+  --graph build/canonical-graph/2021 \
+  --book Ps --format tsv --output build/psalms-boundaries.tsv
+```
+
+Book abbreviations are **case-sensitive** and must match the MorphHB OSIS
+catalogue (e.g. `Gen`, `Ps`, `1Sam`, `Exod`), not BHSA long book names.
+Use either repeatable exact `--verse` flags **or** one `--book`; they are
+mutually exclusive. `--chapter` requires `--book`. A selected chapter
+with no verses fails instead of silently producing an empty report, whereas
+a known singleton verse remains a successful selection with no accentual
+cuts. Unfiltered `boundaries`, `compare-halves` and `compare-syntax`
+still cover the full corpus. `syntax-relations` always requires an explicit
+book or verse selection because pairwise results can grow large. Selected
+rows retain the original canonical graph order, and *every* saved verse is
+validated even when filtering to a book or chapter.
+
 ## Export saved cantillation boundaries
 
 Build the separate, fully verified derived TF graph with `bhsa-cantillation
@@ -422,9 +459,10 @@ bhsa-cantillation syntax-relations \
   --output build/genesis-syntax-relations.tsv
 ```
 
-At least one case-sensitive `--verse` is **required**. Repeat it for other
-verses. This keeps the potentially large `cant_phrase × BHSA syntax node`
-comparison bounded. Duplicate selections are deduplicated and rows are
+At least one case-sensitive `--verse` **or** a canonical OSIS `--book`
+is **required**. Repeat `--verse` for selected individual verses, or use
+`--book Gen --chapter 1` to cover a complete chapter. This prevents an
+unintentional unfiltered `cant_phrase × BHSA syntax node` comparison. Duplicate selections are deduplicated and rows are
 ordered by canonical verse, saved phrase span, syntax type, and original
 syntax node ID. A known singleton verse produces zero rows; an unknown
 verse or a corrupt saved graph fails without overwriting an earlier result.
