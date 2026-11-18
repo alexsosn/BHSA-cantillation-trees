@@ -1,6 +1,17 @@
 """RED exact-slot-set relation contract for original BHSA syntax (#21)."""
 
-from bhsa_cantillation.syntax_relations import classify_slot_relation
+import csv
+import json
+
+import pytest
+
+from bhsa_cantillation.boundaries import load_boundary_api
+from bhsa_cantillation.cli import main
+from bhsa_cantillation.syntax_relations import (
+    classify_slot_relation,
+    iter_syntax_relation_rows,
+)
+from test_syntax_boundary import save_syntax_graph
 
 
 def test_exact_set_relation_partition():
@@ -38,16 +49,6 @@ def test_empty_slotsets_are_inconclusive():
 
 # Integration acceptance contract: the classifier must be usable on the saved
 # BHSA + cantillation Text-Fabric graph, not just hand-picked slot sets.
-import csv
-import json
-
-import pytest
-
-from bhsa_cantillation.boundaries import load_boundary_api
-from bhsa_cantillation.cli import main
-from bhsa_cantillation.syntax_relations import iter_syntax_relation_rows
-from test_syntax_boundary import save_syntax_graph
-
 
 def test_saved_tf_exact_relation_report_uses_original_ids_and_slot_sets(tmp_path):
     graph = save_syntax_graph(tmp_path)
