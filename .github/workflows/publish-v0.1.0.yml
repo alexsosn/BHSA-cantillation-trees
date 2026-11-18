@@ -25,6 +25,8 @@ jobs:
     # Reuse the full pinned-source / original BHSA oslots E2E rather than
     # publishing based only on unit tests or a lightweight-package smoke.
     uses: ./.github/workflows/canonical-graph.yml
+    with:
+      concurrency_scope: release
     permissions:
       contents: read
 
