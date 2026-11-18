@@ -63,7 +63,7 @@ def test_quickstart_commands_match_live_parser_and_pinned_graph_paths():
     assert syntax.command == "compare-syntax"
     assert syntax.graph == build.output
     assert syntax.verse == ["Gen.1.1"]
-    assert syntax.fmt == "tsv"
+    assert syntax.format == "tsv"
     assert syntax.output == Path("build/genesis-1-1-syntax.tsv")
 
     halves = parser().parse_args(documented_command("compare-halves")[1:])
