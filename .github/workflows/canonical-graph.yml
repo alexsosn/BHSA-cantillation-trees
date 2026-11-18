@@ -1,6 +1,7 @@
 name: canonical-graph-integration
 
 on:
+  workflow_call:
   pull_request:
     paths:
       - ".github/workflows/canonical-graph.yml"
