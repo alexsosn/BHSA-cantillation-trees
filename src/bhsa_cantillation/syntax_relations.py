@@ -6,7 +6,6 @@ and clause nodes can interleave without sharing any occupied word slots.
 
 from __future__ import annotations
 
-
 import csv
 import json
 import os
