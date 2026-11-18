@@ -7,6 +7,23 @@ and clause nodes can interleave without sharing any occupied word slots.
 from __future__ import annotations
 
 
+import csv
+import json
+import os
+import tempfile
+from collections import Counter
+from collections.abc import Collection, Iterator
+from pathlib import Path
+
+from .boundaries import iter_boundary_rows
+from .half_verse import _slot_span
+from .syntax_boundary import (
+    SYNTAX_TYPES,
+    _children_by_phrase,
+    _ordered_adjacent_child_slots,
+)
+
+
 def classify_slot_relation(
     cantillation_slots: frozenset[int], syntax_slots: frozenset[int]
 ) -> str:
@@ -29,22 +46,6 @@ def classify_slot_relation(
         return "crossing"
     return "disjoint"
 
-
-import csv
-import json
-import os
-import tempfile
-from collections import Counter
-from collections.abc import Collection, Iterator
-from pathlib import Path
-
-from .boundaries import iter_boundary_rows
-from .half_verse import _slot_span
-from .syntax_boundary import (
-    SYNTAX_TYPES,
-    _children_by_phrase,
-    _ordered_adjacent_child_slots,
-)
 
 RELATION_FIELDS = (
     "verse_node",
