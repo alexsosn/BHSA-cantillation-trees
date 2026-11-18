@@ -3,6 +3,9 @@ name: publish-v0.1.0
 # One-shot first-release trigger. Can also be dispatched again for diagnosis;
 # a pre-existing tag or release blocks accidental replacement.
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/publish-v0.1.0.yml"
   push:
     branches:
       - main
@@ -26,6 +29,7 @@ jobs:
       contents: read
 
   publish:
+    if: github.event_name != 'pull_request'
     needs: verify
     runs-on: ubuntu-latest
     permissions:
