@@ -82,3 +82,11 @@ def test_published_notes_link_to_versioned_readme_and_preserve_source_credit():
     assert "CC BY 4.0" in notes
     assert "Open Scriptures Hebrew Bible" in notes
     assert "NOTICE" in notes
+
+
+def test_release_quickstart_checks_out_versioned_code_not_moving_main():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    quickstart = readme.split(
+        "## Researcher quickstart (pinned 2021 corpus)", 1
+    )[1].split("## Features", 1)[0]
+    assert "git checkout v0.1.0" in quickstart
