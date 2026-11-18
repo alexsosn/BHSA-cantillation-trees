@@ -4,6 +4,8 @@ Numeric span envelopes are not used: discontinuous original BHSA phrase
 and clause nodes can interleave without sharing any occupied word slots.
 """
 
+from __future__ import annotations
+
 
 def classify_slot_relation(
     cantillation_slots: frozenset[int], syntax_slots: frozenset[int]
@@ -27,8 +29,6 @@ def classify_slot_relation(
         return "crossing"
     return "disjoint"
 
-
-from __future__ import annotations
 
 import csv
 import json
@@ -245,12 +245,12 @@ def write_syntax_relation_rows(
                     )
                 else:
                     writer.writerow(record)
+        if len(seen_phrases) != len(boundaries):
+            raise ValueError("Report omitted a saved phrase")
         os.replace(temporary, output)
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
-    if len(seen_phrases) != len(boundaries):
-        raise ValueError("Report omitted a saved phrase")
     return {
         "cuts": len(boundaries),
         "comparable": statuses["comparable"],
