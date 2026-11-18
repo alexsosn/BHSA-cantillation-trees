@@ -18,6 +18,10 @@ def load_workflow(path):
 def test_publication_has_one_shot_main_trigger_and_manual_recovery():
     workflow = load_workflow(PUBLISH)
     assert "workflow_dispatch" in workflow["on"]
+    assert workflow["on"]["pull_request"]["paths"] == [
+        ".github/workflows/publish-v0.1.0.yml",
+    ]
+    assert workflow["jobs"]["publish"]["if"] == "github.event_name != 'pull_request'"
     push = workflow["on"]["push"]
     assert push["branches"] == ["main"]
     assert push["paths"] == [".github/workflows/publish-v0.1.0.yml"]
