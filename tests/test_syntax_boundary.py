@@ -392,3 +392,32 @@ def test_ambiguous_cuts_are_excluded_from_group_rate_denominator(
             )
             assert s["match_fraction_by_type"][kind] == expected
     assert summary["status_counts"]["ambiguous_slots"] > 0
+
+
+def test_missing_accent_label_is_counted_as_separate_group_without_sort_failure(
+    tmp_path, monkeypatch
+):
+    # An absent saved terminal and phrase label may surface as JSON null.
+    # A named accent and a missing one in the same system must sort safely.
+    from bhsa_cantillation import syntax_boundary as exporter
+
+    graph = save_syntax_graph(tmp_path)
+    original = exporter.iter_syntax_boundary_rows
+
+    def with_unknown_atnach(*args, **kwargs):
+        for record in original(*args, **kwargs):
+            if record["cut_accent"] == "Atnach":
+                yield {**record, "cut_accent": None}
+            else:
+                yield record
+
+    monkeypatch.setattr(exporter, "iter_syntax_boundary_rows", with_unknown_atnach)
+    output = tmp_path / "unknown-accent.jsonl"
+    stats = exporter.write_syntax_boundary_rows(load_boundary_api(graph), output)
+    assert [(s["system"], s["accent"], s["cuts"]) for s in stats["by_system_accent"]] == [
+        ("prose", "Tipcha", 2),
+        ("prose", None, 1),
+    ]
+    rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
+    assert len(rows) == 3
+    assert sum(r["cut_accent"] is None for r in rows) == 1
