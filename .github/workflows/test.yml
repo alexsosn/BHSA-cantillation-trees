@@ -22,3 +22,15 @@ jobs:
       - run: python -m pip install -e '.[dev]'
       - run: python -m ruff check .
       - run: python -m pytest
+
+      - name: End-user non-editable install and public CLI entrypoint smoke
+        run: |
+          python -m venv .release-smoke
+          .release-smoke/bin/python -m pip install .
+          .release-smoke/bin/bhsa-cantillation --help > /dev/null
+          .release-smoke/bin/bhsa-cantillation build-graph --help > /dev/null
+          .release-smoke/bin/bhsa-cantillation boundaries --help > /dev/null
+          .release-smoke/bin/bhsa-cantillation compare-halves --help > /dev/null
+          .release-smoke/bin/bhsa-cantillation compare-syntax --help > /dev/null
+          .release-smoke/bin/bhsa-cantillation syntax-relations --help > /dev/null
+
