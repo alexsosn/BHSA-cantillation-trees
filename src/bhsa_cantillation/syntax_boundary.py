@@ -177,6 +177,7 @@ def write_syntax_boundary_rows(
     output.parent.mkdir(parents=True, exist_ok=True)
     counts: Counter[str] = Counter()
     matches: Counter[str] = Counter({kind: 0 for kind in SYNTAX_TYPES})
+    grouped: dict[tuple[str, str], dict[str, Counter[str]]] = {}
     temporary: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
@@ -192,10 +193,22 @@ def write_syntax_boundary_rows(
             for record in iter_syntax_boundary_rows(
                 api, verse_ids=verse_ids, _end_index=endpoints
             ):
-                counts[record["slot_status"]] += 1
+                status = record["slot_status"]
+                counts[status] += 1
+                # A key includes the accentuation system: identical labels
+                # in poetic and prose passages never share a denominator.
+                key = (record["system"], record["cut_accent"])
+                if key not in grouped:
+                    grouped[key] = {
+                        "statuses": Counter(),
+                        "matches": Counter({kind: 0 for kind in SYNTAX_TYPES}),
+                    }
+                stratum = grouped[key]
+                stratum["statuses"][status] += 1
                 for kind in SYNTAX_TYPES:
                     if record[f"ends_{kind}"] is True:
                         matches[kind] += 1
+                        stratum["matches"][kind] += 1
                 if fmt == "jsonl":
                     handle.write(
                         json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
@@ -206,10 +219,28 @@ def write_syntax_boundary_rows(
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
+    by_system_accent = []
+    for (system, accent), stratum in sorted(grouped.items()):
+        statuses = stratum["statuses"]
+        hits = stratum["matches"]
+        comparable = statuses["comparable"]
+        by_system_accent.append({
+            "system": system,
+            "accent": accent,
+            "cuts": statuses.total(),
+            "comparable": comparable,
+            "status_counts": dict(sorted(statuses.items())),
+            "matches_by_type": {kind: hits[kind] for kind in SYNTAX_TYPES},
+            "match_fraction_by_type": {
+                kind: round(hits[kind] / comparable, 6) if comparable else None
+                for kind in SYNTAX_TYPES
+            },
+        })
     return {
         "cuts": counts.total(),
         "comparable": counts["comparable"],
         "status_counts": dict(sorted(counts.items())),
         "matches_by_type": {kind: matches[kind] for kind in SYNTAX_TYPES},
         "syntax_node_exclusions_global": exclusions,
+        "by_system_accent": by_system_accent,
     }
