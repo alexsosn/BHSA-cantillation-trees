@@ -9,6 +9,8 @@ on:
       - "src/bhsa_cantillation/boundaries.py"
       - "src/bhsa_cantillation/syntax_boundary.py"
       - "tests/test_syntax_boundary.py"
+      - "tests/test_researcher_quickstart.py"
+      - "README.md"
       - "tests/test_boundaries.py"
       - "tests/test_graph*.py"
       - "scripts/audit_syntax_oslots.py"
@@ -117,6 +119,56 @@ jobs:
           print("Verified complete graph:", stats)
           PY
           du -sh build/canonical-graph/2021
+
+      - name: End-user README quickstart smoke on original Gen.1.1
+        run: |
+          # Same documented commands and file paths as a fresh researcher clone.
+          bhsa-cantillation compare-syntax \
+            --graph build/canonical-graph/2021 \
+            --verse Gen.1.1 \
+            --format tsv --output build/genesis-1-1-syntax.tsv
+          bhsa-cantillation compare-halves \
+            --graph build/canonical-graph/2021 \
+            --verse Gen.1.1 \
+            --format jsonl --output build/genesis-1-1-halves.jsonl
+          python - <<'PY'
+          import csv
+          import json
+          from pathlib import Path
+
+          from bhsa_cantillation.boundaries import load_boundary_api
+
+          with Path("build/genesis-1-1-syntax.tsv").open(
+              encoding="utf-8", newline=""
+          ) as handle:
+              syntax = list(csv.DictReader(handle, delimiter="\t"))
+          assert syntax
+          assert {row["osis_id"] for row in syntax} == {"Gen.1.1"}
+          by_id = {row["phrase_id"]: row for row in syntax}
+          assert all(row["slot_status"] == "comparable" for row in by_id.values())
+          yes = by_id["Gen.1.1#p1-2"]
+          no = by_id["Gen.1.1#p3-4"]
+          assert yes["ends_phrase"] == "True"
+          assert "651573" in yes["phrase_nodes"].split(";")
+          assert no["ends_phrase"] == "False"
+          assert no["phrase_nodes"] == ""
+
+          api = load_boundary_api(Path("build/canonical-graph/2021"))
+          assert api.F.otype.v(651573) == "phrase"
+          original = set(api.E.oslots.s(651573))
+          assert original
+          assert max(original) == int(yes["bhsa_cut_after_slot"])
+          assert int(yes["cut_after_word_index"]) > 0
+          half = [
+              json.loads(line)
+              for line in Path("build/genesis-1-1-halves.jsonl")
+                  .read_text(encoding="utf-8").splitlines()
+          ]
+          assert len(half) == 1
+          assert half[0]["osis_id"] == "Gen.1.1"
+          assert half[0]["status"] == "match"
+          print("README first-analysis E2E verified from original pinned oslots")
+          PY
 
       - name: Export and independently cross-check all saved phrase boundaries
         run: |
