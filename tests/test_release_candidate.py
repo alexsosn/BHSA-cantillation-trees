@@ -47,3 +47,15 @@ def test_release_notes_state_supported_workflows_and_known_limits():
         assert phrase in notes
     # No promise that the derived full graph ships inside the lightweight module.
     assert "generated locally" in notes.lower()
+
+
+def test_ci_checks_noneditable_install_and_public_cli_help():
+    workflow = (ROOT / ".github/workflows/test.yml").read_text(encoding="utf-8")
+    assert "python -m venv" in workflow
+    assert " -m pip install ." in workflow
+    assert "bhsa-cantillation --help" in workflow
+    for command in (
+        "build-graph", "boundaries", "compare-halves",
+        "compare-syntax", "syntax-relations",
+    ):
+        assert f"bhsa-cantillation {command} --help" in workflow
