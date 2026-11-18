@@ -9,6 +9,80 @@ reconstructs a prosodic tree for every verse.
 The generated module covers the complete Hebrew Bible, including the poetic
 accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 
+## Researcher quickstart (pinned 2021 corpus)
+
+This example answers a concrete research question: **which cantillation cuts
+in Genesis 1:1 coincide with the ends of original BHSA syntactic phrases?**
+It starts from a fresh clone and uses the same fixed upstream revisions as
+the repository's full-corpus CI. Commands below use a POSIX shell
+(Linux/macOS, or a compatible shell on Windows), Git and Python 3.10+.
+
+```bash
+git clone https://github.com/alexsosn/BHSA-cantillation-trees.git
+cd BHSA-cantillation-trees
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -e .
+
+# Fetch only the files needed for the pinned original BHSA and MorphHB data.
+mkdir -p inputs
+git clone --filter=blob:none --sparse https://github.com/ETCBC/bhsa.git inputs/bhsa
+git -C inputs/bhsa sparse-checkout set tf/2021
+git -C inputs/bhsa checkout 4db00e2157915495e1a4d3d57e41223df24775da
+
+git clone --filter=blob:none --sparse https://github.com/openscriptures/morphhb.git inputs/morphhb
+git -C inputs/morphhb sparse-checkout set wlc structure/OshbVerse/Script
+git -C inputs/morphhb checkout 3d15126fb1ef74867fc1434be1942e837932691f
+
+# Verify all source-word alignments and build the searchable derived TF graph.
+bhsa-cantillation build-graph \
+  --bhsa inputs/bhsa/tf/2021 \
+  --module tf/2021 \
+  --morphhb inputs/morphhb \
+  --output build/canonical-graph/2021 \
+  --source-commit 3d15126fb1ef74867fc1434be1942e837932691f
+
+# Which original BHSA syntactic object ends coincide with each saved cut?
+bhsa-cantillation compare-syntax \
+  --graph build/canonical-graph/2021 \
+  --verse Gen.1.1 \
+  --format tsv --output build/genesis-1-1-syntax.tsv
+
+# Compare the principal cantillation division to the BHSA half_verse division.
+bhsa-cantillation compare-halves \
+  --graph build/canonical-graph/2021 \
+  --verse Gen.1.1 \
+  --format jsonl --output build/genesis-1-1-halves.jsonl
+```
+
+Open `build/genesis-1-1-syntax.tsv` in a spreadsheet or TSV viewer.
+Each row is a saved cantillation `cant_phrase` cut, identified by the
+`phrase_id` and source verse `osis_id` (**OSIS** reference). Inspect
+`slot_status` before comparing the `ends_phrase` flag and
+`phrase_nodes` original BHSA IDs. In the pinned data, the cut
+`Gen.1.1#p1-2` coincides with original BHSA phrase **651573**, while
+`Gen.1.1#p3-4` does not coincide with an original phrase ending.
+Inspect the rest of the four syntax types in the same TSV.
+
+`cut_after_word_index` counts MorphHB source orthographic words within
+the verse. `bhsa_cut_after_slot` is an original BHSA word-slot ID. The
+coordinates are different and must never be compared numerically as if they
+referred to the same tokens. Only `slot_status=comparable` has a defined
+BHSA cut endpoint. A `fuzzy_alignment` or `ambiguous_slots` is
+inconclusive rather than a syntactic disagreement. The second command's
+`compare-halves` result compares cantillation's main cut with BHSA's
+structural `half_verse` division; it is **not** an independent syntax
+validation score.
+
+The complete graph is a separately generated local artifact, **not** the
+smaller checked-in `tf/2021` module. **Do not reuse a nonempty**
+`build/canonical-graph/2021` output directory: `build-graph` explicitly
+rejects this to prevent accidental mixing with stale data. Use a new empty
+output path for a new build. These analyses validate the entire persisted
+graph, even if you select one verse. Additional commands and field definitions
+appear below under *Export saved cantillation boundaries* and
+*Compare saved cantillation cuts with BHSA syntax endings*.
+
 ## Features
 
 | Feature | Node type | Value |
