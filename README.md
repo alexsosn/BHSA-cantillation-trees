@@ -24,6 +24,7 @@ the repository's full-corpus CI. Commands below use a POSIX shell
 ```bash
 git clone https://github.com/alexsosn/BHSA-cantillation-trees.git
 cd BHSA-cantillation-trees
+git checkout v0.1.0
 python -m venv .venv
 . .venv/bin/activate
 python -m pip install -e .
