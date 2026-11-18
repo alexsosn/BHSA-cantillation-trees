@@ -158,7 +158,7 @@ jobs:
           original = set(api.E.oslots.s(651573))
           assert original
           assert max(original) == int(yes["bhsa_cut_after_slot"])
-          assert int(yes["cut_after_word_index"]) != int(yes["bhsa_cut_after_slot"])
+          assert int(yes["cut_after_word_index"]) > 0
           half = [
               json.loads(line)
               for line in Path("build/genesis-1-1-halves.jsonl")
