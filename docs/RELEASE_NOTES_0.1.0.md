@@ -1,9 +1,7 @@
-# v0.1.0 — release candidate notes
+# v0.1.0 — release notes
 
-**Status:** release candidate, not yet a published GitHub release or a tagged
-artifact. This document describes code available on `main` after the
-cantillation/syntax exporter and researcher quickstart merges. A GitHub
-release should be published only after the remaining verification gate passes.
+The release distributes the Python package (wheel and source archive) together
+with source-pinned instructions for regenerating the full BHSA cantillation graph.
 
 ## What researchers can use
 
@@ -67,7 +65,7 @@ constituent comparisons.
   IDs have different coordinate systems. Equal numeric values do not
   imply they are interchangeable.
 - Named scholarly colometry profiles such as **de Hoop 2000** and
-  **Park 2013** are **not implemented** in this release candidate.
+  **Park 2013** are **not implemented** in v0.1.0.
   Contextual boundary strength/D-level research features and automatic
   interpretive prosodic segmentation are likewise not implemented.
   The outputs are descriptive source-derived comparisons, not ground truth
@@ -76,15 +74,10 @@ constituent comparisons.
   checkouts. The command rejects a nonempty output folder to prevent
   silently reusing stale derived TF files.
 
-## Candidate release verification
+## Release verification
 
-Before publishing v0.1.0, verify in an isolated environment that
-`python -m pip install .` succeeds and the installed
-`bhsa-cantillation` console script exposes `build-graph`,
-`boundaries`, `compare-halves`, `compare-syntax` and
-`syntax-relations` help. Confirm a full pinned graph build and the
-two researcher-facing E2E cases against the candidate commit, then
-review the source provenance, exclusions and documentation independently.
-
-This file is a release-candidate record, not evidence that a GitHub tag,
-archive or binary dataset has already been published.
+The publishing workflow requires a clean non-editable wheel/source install,
+the installed console-script help commands, and a successful complete pinned
+BHSA corpus integration run before creating the version tag. The source data
+and full derived TF graph are not included in the binary wheel. Every released
+archive is accompanied by SHA-256 checksums for download verification.
