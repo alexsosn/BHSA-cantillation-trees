@@ -27,7 +27,10 @@ def test_publication_has_one_shot_main_trigger_and_manual_recovery():
     push = workflow["on"]["push"]
     assert push["branches"] == ["main"]
     assert push["paths"] == [".github/workflows/publish-v0.1.0.yml"]
-    assert workflow["concurrency"]["cancel-in-progress"] == "false"
+    assert workflow["concurrency"]["group"] == "publish-v0.1.0-${{ github.ref }}"
+    assert workflow["concurrency"]["cancel-in-progress"] == (
+        "${{ github.event_name == 'pull_request' }}"
+    )
 
 
 def test_publication_is_blocked_by_reused_full_pinned_graph_gate():
