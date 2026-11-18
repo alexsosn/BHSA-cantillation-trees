@@ -21,7 +21,9 @@ def test_publication_has_one_shot_main_trigger_and_manual_recovery():
     assert workflow["on"]["pull_request"]["paths"] == [
         ".github/workflows/publish-v0.1.0.yml",
     ]
-    assert workflow["jobs"]["publish"]["if"] == "github.event_name != 'pull_request'"
+    assert workflow["jobs"]["publish"]["if"] == (
+        "github.event_name != 'pull_request' && github.ref == 'refs/heads/main'"
+    )
     push = workflow["on"]["push"]
     assert push["branches"] == ["main"]
     assert push["paths"] == [".github/workflows/publish-v0.1.0.yml"]
