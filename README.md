@@ -430,7 +430,33 @@ The JSON summary distinguishes `cuts`, `comparable`,
 **cantillation cuts**, not the possibly larger number of cofinal BHSA syntax
 nodes. `syntax_node_exclusions_global` reports original syntax-node
 exclusions over the **whole loaded BHSA graph**, even for a selected verse,
-and is not part of the cut denominator. As with `boundaries`, repeated
+and is not part of the cut denominator.
+
+On the development branch (after v0.1.0), the same JSON summary also contains
+`by_system_accent`, a deterministically sorted list grouped by the exact
+`system` (`prose` or `poetic`) and `cut_accent` recorded on each saved
+phrase cut. Each group reports `cuts`, `comparable`, `status_counts`,
+`matches_by_type`, and `match_fraction_by_type`. For example:
+
+```bash
+bhsa-cantillation compare-syntax \
+  --graph build/canonical-graph/2021 \
+  --book Gen --chapter 1 --format tsv \
+  --output build/genesis-1-cuts.tsv > build/genesis-1-syntax-summary.json
+```
+
+For each original BHSA syntax type, the group fraction is
+`matches_by_type[type] / comparable`, rounded to six decimals. The raw
+integer numerator and denominator remain available without rounding.
+A group with zero comparable cuts has a `null` fraction, not 0% agreement.
+Fuzzy alignments and ambiguous BHSA slot projections are counted under their
+own status but **excluded from the rate denominator**. Each matching cut
+counts once even when several original BHSA nodes end at that cut. Prose
+and poetic groups are distinct even when an accent has the same name;
+a fraction measures descriptive co-termination, not linguistic validity
+or cross-system accent rank. Known singleton selections have an empty list.
+
+As with `boundaries`, repeated
 `--verse` selects exact OSIS IDs in graph order, the full persisted graph is
 validated, a known singleton verse has zero rows, and validation failures
 leave the prior output untouched.

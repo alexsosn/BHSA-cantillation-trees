@@ -418,6 +418,55 @@ jobs:
               == summary["matches_by_type"][kind]
               for kind in ("phrase", "phrase_atom", "clause", "clause_atom")
           )
+
+          # Independent oracle: reconstruct all summary strata directly
+          # from the full 142,534-row researcher JSONL export. Never call
+          # the producer's grouping/aggregation helper as test oracle.
+          from collections import Counter, defaultdict
+
+          buckets = defaultdict(list)
+          for row in rows:
+              buckets[(row["system"], row["cut_accent"])].append(row)
+          kinds = ("phrase", "phrase_atom", "clause_atom", "clause")
+          expected_groups = []
+          for (system, accent), selected in sorted(buckets.items()):
+              statuses = Counter(row["slot_status"] for row in selected)
+              denominator = statuses["comparable"]
+              hits = {
+                  kind: sum(row[f"ends_{kind}"] is True for row in selected)
+                  for kind in kinds
+              }
+              expected_groups.append({
+                  "system": system,
+                  "accent": accent,
+                  "cuts": len(selected),
+                  "comparable": denominator,
+                  "status_counts": dict(sorted(statuses.items())),
+                  "matches_by_type": hits,
+                  "match_fraction_by_type": {
+                      kind: round(hits[kind] / denominator, 6)
+                      if denominator else None
+                      for kind in kinds
+                  },
+              })
+          assert summary["by_system_accent"] == expected_groups
+          assert {key[0] for key in buckets} == {"prose", "poetic"}
+          assert any(
+              item["cuts"] > item["comparable"] for item in expected_groups
+          ), "real pinned graph should include non-comparable source projections"
+          assert sum(item["cuts"] for item in expected_groups) == len(rows)
+          assert sum(item["comparable"] for item in expected_groups) == (
+              summary["comparable"]
+          )
+          for kind in kinds:
+              assert sum(
+                  item["matches_by_type"][kind] for item in expected_groups
+              ) == summary["matches_by_type"][kind]
+          print(
+              "Independently verified real accent/system syntax strata:",
+              len(expected_groups), "groups across", len(rows), "saved cuts"
+          )
+
           positives = [r for r in rows if r["slot_status"] == "comparable"
                        and r["ends_phrase"]]
           negatives = [r for r in rows if r["slot_status"] == "comparable"
