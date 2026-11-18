@@ -9,6 +9,10 @@ reconstructs a prosodic tree for every verse.
 The generated module covers the complete Hebrew Bible, including the poetic
 accentuation system of Psalms, Proverbs, and the poetic portion of Job.
 
+Release-candidate scope, pinned results and limitations are listed in
+[v0.1.0 release notes](docs/RELEASE_NOTES_0.1.0.md). These are candidate
+notes; publishing a GitHub release remains a separate verified step.
+
 ## Researcher quickstart (pinned 2021 corpus)
 
 This example answers a concrete research question: **which cantillation cuts
