@@ -177,7 +177,7 @@ def write_syntax_boundary_rows(
     output.parent.mkdir(parents=True, exist_ok=True)
     counts: Counter[str] = Counter()
     matches: Counter[str] = Counter({kind: 0 for kind in SYNTAX_TYPES})
-    grouped: dict[tuple[str, str], dict[str, Counter[str]]] = {}
+    grouped: dict[tuple[str, str | None], dict[str, Counter[str]]] = {}
     temporary: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
@@ -220,7 +220,15 @@ def write_syntax_boundary_rows(
         if temporary is not None:
             temporary.unlink(missing_ok=True)
     by_system_accent = []
-    for (system, accent), stratum in sorted(grouped.items()):
+    # Text-Fabric can represent an absent cut-accent label as None. Keep
+    # the unknown-label stratum rather than crashing when sorting mixed
+    # (string, None) keys after the output file has already been replaced.
+    for (system, accent), stratum in sorted(
+        grouped.items(),
+        key=lambda item: (
+            item[0][0], item[0][1] is None, item[0][1] or "",
+        ),
+    ):
         statuses = stratum["statuses"]
         hits = stratum["matches"]
         comparable = statuses["comparable"]
