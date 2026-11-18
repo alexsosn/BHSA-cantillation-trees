@@ -34,7 +34,7 @@ def source(name, slots, path, accent):
 
 def save_syntax_graph(
     tmp_path, *, alignment="exact", source_slots=((1, 2), (3,), (4,), (5,)),
-    psalm_split=False, missing_clause_layer=False,
+    psalm_split=False, missing_clause_layer=False, containing_clause=False,
 ):
     tf = pytest.importorskip("tf.fabric")
     core, derived = tmp_path / "core", tmp_path / "derived"
@@ -53,7 +53,7 @@ def save_syntax_graph(
         # from the BHSA warp. Treating this as zero matches is unsound.
         types[8] = types[9] = "clause_atom"
     spans = {
-        8: {1, 2, 3}, 9: {5, 6},
+        8: ({1, 2, 3, 4, 5} if containing_clause else {1, 2, 3}), 9: {5, 6},
         10: {1, 2, 3},
         11: {1, 2, 3}, 12: {3}, 13: {1, 4}, 14: {5, 6},
         15: {1, 2}, 16: {4, 5},

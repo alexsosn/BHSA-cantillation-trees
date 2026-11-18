@@ -324,6 +324,77 @@ syntactic or prosodic validity. The `half_verse` division belongs to a
 different BHSA structural tier. See the exact-slot-set research record in
 [issue #21](https://github.com/alexsosn/BHSA-cantillation-trees/issues/21).
 
+## Inspect exact cantillation–syntax constituency relations
+
+Use `syntax-relations` to answer whether a saved accentual constituent is
+identical to, contained in, contains, crosses, or is disjoint from an original
+BHSA `phrase`, `phrase_atom`, `clause_atom`, or `clause`.
+The command reads the persisted graph and original BHSA `oslots`; it
+neither reconstructs the tree nor materializes pairwise edges.
+
+```bash
+bhsa-cantillation syntax-relations \
+  --graph build/canonical-graph/2021 \
+  --verse Gen.1.1 --verse Gen.1.7 \
+  --format jsonl --output build/genesis-syntax-relations.jsonl
+bhsa-cantillation syntax-relations \
+  --graph build/canonical-graph/2021 \
+  --verse Gen.1.7 --format tsv \
+  --output build/genesis-syntax-relations.tsv
+```
+
+At least one case-sensitive `--verse` is **required**. Repeat it for other
+verses. This keeps the potentially large `cant_phrase × BHSA syntax node`
+comparison bounded. Duplicate selections are deduplicated and rows are
+ordered by canonical verse, saved phrase span, syntax type, and original
+syntax node ID. A known singleton verse produces zero rows; an unknown
+verse or a corrupt saved graph fails without overwriting an earlier result.
+The entire saved cantillation graph is checked even when only one verse
+is selected.
+
+Each row identifies the OSIS verse, saved `phrase_id` and `phrase_node`,
+its original BHSA slot set (`cantillation_bhsa_slots`), the selected
+original BHSA `syntax_type` and numeric `syntax_node`, its **exact**
+`syntax_bhsa_slots`, and `relation`. Both slot sets are rendered as
+inclusive consecutive runs, e.g. `1-3,5` for a discontinuous node.
+`cut_after_word_index` is a MorphHB orthographic word position, **not** a
+BHSA slot index.
+
+The mutually exclusive pairwise relations are:
+
+| `relation` | Meaning |
+| --- | --- |
+| `exact` | Identical occupied BHSA slot sets |
+| `inside` | Cantillation phrase is a proper subset of the BHSA syntax node |
+| `contains` | Cantillation phrase is a proper superset of the syntax node |
+| `crossing` | They overlap in occupied BHSA slots, neither containing the other |
+| `disjoint` | They share **no** occupied slots, even when numeric envelopes interleave |
+
+Only `slot_status=comparable` phrases are classified: their verse alignment
+must be `exact`, and the two saved children must have disjoint, consecutive,
+forward-ordered and adjacent BHSA slot projections. For `fuzzy_alignment`
+or `ambiguous_slots` the report emits one row for the affected phrase with
+`relation=null` and no syntax node; this is **inconclusive**, not a
+disagreement. A comparable phrase with no eligible original syntax nodes also
+receives one null row. Original syntax nodes spanning verses, missing slots,
+or pointing to unassigned slots are excluded rather than silently attached
+to one verse.
+
+The printed JSON summary separates `cuts` (saved cantillation phrases),
+`comparable` (eligible phrases), `comparisons` (actual phrase/syntax
+pairs), `status_counts` (per phrase), `relation_counts` (per pair),
+`relations_by_type` (per pair/type), `candidates_selected_by_type`
+(distinct original syntax nodes in selected verses),
+`syntax_node_totals_global` and `syntax_node_exclusions_global`.
+Do not divide pair counts by the number of cuts or interpret a shared
+end-boundary as exact constituency. In the pinned BHSA, functional syntax
+nodes may be gapped and even cross verse boundaries, so checking only
+`min(oslots)` and `max(oslots)` produces false crossing claims.
+
+This is a descriptive comparison of two source-encoded structures, not
+an independent correctness score for either. For simpler cut-end questions,
+use `compare-syntax`; for whole-verse main divisions use `compare-halves`.
+
 ## Export and ASCII rendering
 
 Export the whole module as JSON Lines, or select verses into a JSON array:

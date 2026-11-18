@@ -62,6 +62,18 @@ def parser() -> argparse.ArgumentParser:
         help="select an exact OSIS verse ID; repeat for multiple verses",
     )
     syntax.add_argument("--output", type=Path, required=True)
+
+    relations = commands.add_parser(
+        "syntax-relations",
+        help="compare saved cantillation phrases with original BHSA syntax slot sets",
+    )
+    relations.add_argument("--graph", type=Path, required=True, help="derived graph TF directory")
+    relations.add_argument("--format", choices=("jsonl", "tsv"), default="jsonl")
+    relations.add_argument(
+        "--verse", action="append", required=True, metavar="OSIS_ID",
+        help="required exact OSIS verse ID; repeat for multiple verses",
+    )
+    relations.add_argument("--output", type=Path, required=True)
     return root
 
 
@@ -117,6 +129,16 @@ def main(argv: list[str] | None = None) -> int:
         stats = write_syntax_boundary_rows(
             load_boundary_api(args.graph), args.output,
             fmt=args.format, verse_ids=args.verse or None,
+        )
+        print(json.dumps({**stats, "output": str(args.output)}, sort_keys=True))
+        return 0
+    if args.command == "syntax-relations":
+        from .boundaries import load_boundary_api
+        from .syntax_relations import write_syntax_relation_rows
+
+        stats = write_syntax_relation_rows(
+            load_boundary_api(args.graph), args.output,
+            fmt=args.format, verse_ids=args.verse,
         )
         print(json.dumps({**stats, "output": str(args.output)}, sort_keys=True))
         return 0
