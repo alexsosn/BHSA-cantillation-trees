@@ -1,8 +1,8 @@
 """RED acceptance gates for a clean-workspace researcher quickstart (#25)."""
 
-from pathlib import Path
 import re
 import shlex
+from pathlib import Path
 
 from bhsa_cantillation.cli import parser
 
@@ -20,19 +20,31 @@ def quickstart() -> str:
 
 def documented_command(command: str) -> list[str]:
     text = re.sub(r"\\\n[ \t]*", " ", quickstart())
-    matches = re.findall(rf"^bhsa-cantillation {re.escape(command)}(?: [^\n]*)?$",
-                         text, flags=re.MULTILINE)
+    matches = re.findall(
+        rf"^bhsa-cantillation {re.escape(command)}(?: [^\\n]*)?$",
+        text,
+        flags=re.MULTILINE,
+    )
     assert len(matches) == 1, (command, matches)
     return shlex.split(matches[0])
 
 
 def test_quickstart_pins_complete_source_inputs():
     text = quickstart()
-    assert "git clone --filter=blob:none --sparse https://github.com/ETCBC/bhsa.git inputs/bhsa" in text
+    assert (
+        "git clone --filter=blob:none --sparse "
+        "https://github.com/ETCBC/bhsa.git inputs/bhsa"
+    ) in text
     assert "git -C inputs/bhsa sparse-checkout set tf/2021" in text
     assert f"git -C inputs/bhsa checkout {BHSA_COMMIT}" in text
-    assert "git clone --filter=blob:none --sparse https://github.com/openscriptures/morphhb.git inputs/morphhb" in text
-    assert "git -C inputs/morphhb sparse-checkout set wlc structure/OshbVerse/Script" in text
+    assert (
+        "git clone --filter=blob:none --sparse "
+        "https://github.com/openscriptures/morphhb.git inputs/morphhb"
+    ) in text
+    assert (
+        "git -C inputs/morphhb sparse-checkout set "
+        "wlc structure/OshbVerse/Script"
+    ) in text
     assert f"git -C inputs/morphhb checkout {MORPHHB_COMMIT}" in text
     assert "python -m pip install -e ." in text
     assert "Do not reuse a nonempty" in text
