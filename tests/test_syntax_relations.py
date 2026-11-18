@@ -4,6 +4,7 @@ import csv
 import json
 
 import pytest
+from test_syntax_boundary import save_syntax_graph
 
 from bhsa_cantillation.boundaries import load_boundary_api
 from bhsa_cantillation.cli import main
@@ -11,7 +12,6 @@ from bhsa_cantillation.syntax_relations import (
     classify_slot_relation,
     iter_syntax_relation_rows,
 )
-from test_syntax_boundary import save_syntax_graph
 
 
 def test_exact_set_relation_partition():
