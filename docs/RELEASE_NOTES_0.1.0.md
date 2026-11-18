@@ -29,7 +29,7 @@ The `bhsa-cantillation` command provides:
   `exact`, `inside`, `contains`, `crossing` or `disjoint`.
   A `--verse` selection is required to bound this pairwise report.
 
-The README's [researcher quickstart](../README.md#researcher-quickstart-pinned-2021-corpus)
+The [researcher quickstart](https://github.com/alexsosn/BHSA-cantillation-trees/blob/v0.1.0/README.md#researcher-quickstart-pinned-2021-corpus)
 provides the copyable source checkout, install, graph-build and initial
 Genesis 1:1 analysis workflow. Use the end-boundary report for a quick
 question about a cantillation cut, and `syntax-relations` for exact
@@ -73,6 +73,15 @@ constituent comparisons.
 - The full queryable graph must be built from the two pinned source
   checkouts. The command rejects a nonempty output folder to prevent
   silently reusing stale derived TF files.
+
+## Source credit and licensing
+
+The MorphHB source data is licensed under **CC BY 4.0**. Required attribution:
+"Original work of the Open Scriptures Hebrew Bible available at
+https://github.com/openscriptures/morphhb". See the repository's
+[NOTICE](https://github.com/alexsosn/BHSA-cantillation-trees/blob/v0.1.0/NOTICE).
+The BHSA source repository includes an MIT license. Source copyrights and
+licenses remain those of their respective projects.
 
 ## Release verification
 
