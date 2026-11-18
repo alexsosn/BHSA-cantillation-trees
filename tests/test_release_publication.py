@@ -37,9 +37,11 @@ def test_publication_is_blocked_by_reused_full_pinned_graph_gate():
     workflow = load_workflow(PUBLISH)
     canonical = load_workflow(GRAPH)
     assert "workflow_call" in canonical["on"]
-    # A called workflow sees its caller's github.workflow. Include that in
-    # concurrency groups so the standalone PR run cannot cancel the caller.
-    assert "github.workflow" in canonical["concurrency"]["group"]
+    # Separate reusable release calls and standalone PR builds explicitly,
+    # regardless of how GitHub resolves caller workflow name and run context.
+    assert "concurrency_scope" in canonical["on"]["workflow_call"]["inputs"]
+    assert "inputs.concurrency_scope" in canonical["concurrency"]["group"]
+    assert workflow["jobs"]["verify"]["with"]["concurrency_scope"] == "release"
     assert workflow["jobs"]["verify"]["uses"] == "./.github/workflows/canonical-graph.yml"
     publish = workflow["jobs"]["publish"]
     assert publish["needs"] == "verify"
