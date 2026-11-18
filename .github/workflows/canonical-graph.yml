@@ -495,9 +495,10 @@ jobs:
           for n in $(seq 1 31); do
             verses+=(--verse "Gen.1.$n")
           done
+          # Researcher command: select a full chapter, not 31 hand-written verse flags.
           bhsa-cantillation syntax-relations \
             --graph build/canonical-graph/2021 \
-            "${verses[@]}" --format jsonl \
+            --book Gen --chapter 1 --format jsonl \
             --output build/syntax-relations.jsonl > build/syntax-relations-summary.json
           bhsa-cantillation syntax-relations \
             --graph build/canonical-graph/2021 \
@@ -519,7 +520,9 @@ jobs:
               Path("build/syntax-relations-summary.json").read_text(encoding="utf-8")
           )
           assert rows
-          assert all(row["osis_id"].startswith("Gen.1.") for row in rows)
+          assert {row["osis_id"] for row in rows} == {
+              f"Gen.1.{n}" for n in range(1, 32)
+          }
           assert all(row["verse_node"] in range(1414389, 1437602) for row in rows)
           phrases = {}
           for row in rows:
