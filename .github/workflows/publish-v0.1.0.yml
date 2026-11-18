@@ -29,7 +29,7 @@ jobs:
       contents: read
 
   publish:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: verify
     runs-on: ubuntu-latest
     permissions:
