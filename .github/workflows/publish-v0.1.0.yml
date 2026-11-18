@@ -17,8 +17,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: publish-v0.1.0
-  cancel-in-progress: false
+  group: publish-v0.1.0-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
