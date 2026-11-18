@@ -272,3 +272,123 @@ def test_missing_original_syntax_layer_fails_closed_and_preserves_output(tmp_pat
         ])
     assert output.read_bytes() == b"prior verified export\n"
     assert not list(tmp_path.glob(".previous.jsonl.*.tmp"))
+
+
+def test_summary_by_system_and_accent_has_truthful_exact_denominators(tmp_path, capsys):
+    # The source fixture has 3 Genesis cuts and 1 Psalm cut; the two
+    # Atnach labels must remain separate because their systems differ.
+    graph = save_syntax_graph(tmp_path, psalm_split=True)
+    jsonl = tmp_path / "cuts.jsonl"
+    assert main([
+        "compare-syntax", "--graph", str(graph), "--output", str(jsonl),
+    ]) == 0
+    report = json.loads(capsys.readouterr().out)
+    strata = report["by_system_accent"]
+    assert [(s["system"], s["accent"], s["cuts"]) for s in strata] == [
+        ("poetic", "Atnach", 1),
+        ("prose", "Atnach", 1),
+        ("prose", "Tipcha", 2),
+    ]
+    assert all(s["status_counts"] == {"comparable": s["cuts"]} for s in strata)
+    assert all(s["comparable"] == s["cuts"] for s in strata)
+    expected = {
+        ("poetic", "Atnach"): (0, 0, 0, 0),
+        ("prose", "Atnach"): (1, 0, 1, 1),
+        ("prose", "Tipcha"): (1, 1, 0, 0),
+    }
+    types = ("phrase", "phrase_atom", "clause_atom", "clause")
+    for s in strata:
+        counts = dict(zip(types, expected[(s["system"], s["accent"])], strict=True))
+        assert s["matches_by_type"] == counts
+        assert s["match_fraction_by_type"] == {
+            kind: round(value / s["comparable"], 6)
+            for kind, value in counts.items()
+        }
+    assert sum(s["cuts"] for s in strata) == report["cuts"] == 4
+    assert sum(s["comparable"] for s in strata) == report["comparable"]
+    for kind in types:
+        assert sum(s["matches_by_type"][kind] for s in strata) == (
+            report["matches_by_type"][kind]
+        )
+    assert len(jsonl.read_text(encoding="utf-8").splitlines()) == 4
+
+
+def test_noncomparable_group_has_null_fractions_not_false_zeroes(tmp_path, capsys):
+    graph = save_syntax_graph(tmp_path, alignment="fuzzy", psalm_split=True)
+    output = tmp_path / "fuzzy.jsonl"
+    assert main([
+        "compare-syntax", "--graph", str(graph), "--book", "Gen",
+        "--output", str(output),
+    ]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["cuts"] == 3
+    assert report["comparable"] == 0
+    strata = report["by_system_accent"]
+    assert [(s["system"], s["accent"], s["cuts"]) for s in strata] == [
+        ("prose", "Atnach", 1),
+        ("prose", "Tipcha", 2),
+    ]
+    for s in strata:
+        assert s["comparable"] == 0
+        assert s["status_counts"] == {"fuzzy_alignment": s["cuts"]}
+        assert all(value == 0 for value in s["matches_by_type"].values())
+        assert all(value is None for value in s["match_fraction_by_type"].values())
+    rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
+    assert all(r["ends_phrase"] is None for r in rows)
+
+
+def test_singleton_grouped_summary_is_empty_and_fixed_jsonl_tsv_stays_unchanged(
+    tmp_path, capsys
+):
+    graph = save_syntax_graph(tmp_path)
+    jsonl = tmp_path / "singleton.jsonl"
+    assert main([
+        "compare-syntax", "--graph", str(graph), "--book", "Ps",
+        "--chapter", "117", "--output", str(jsonl),
+    ]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["cuts"] == 0
+    assert report["by_system_accent"] == []
+    assert jsonl.read_bytes() == b""
+
+    tsv = tmp_path / "singleton.tsv"
+    assert main([
+        "compare-syntax", "--graph", str(graph), "--book", "Ps",
+        "--chapter", "117", "--format", "tsv", "--output", str(tsv),
+    ]) == 0
+    assert json.loads(capsys.readouterr().out)["by_system_accent"] == []
+    with tsv.open(encoding="utf-8", newline="") as stream:
+        assert list(csv.DictReader(stream, delimiter="\\t")) == []
+
+
+@pytest.mark.parametrize(
+    "slots",
+    (
+        ((1, 2), (3,), (3,), (5,)),
+        ((1, 2), (4,), (3,), (5,)),
+    ),
+)
+def test_ambiguous_cuts_are_excluded_from_group_rate_denominator(
+    tmp_path, capsys, slots
+):
+    graph = save_syntax_graph(tmp_path, source_slots=slots)
+    output = tmp_path / "ambiguous.jsonl"
+    assert main([
+        "compare-syntax", "--graph", str(graph), "--book", "Gen",
+        "--output", str(output),
+    ]) == 0
+    summary = json.loads(capsys.readouterr().out)
+    strata = summary["by_system_accent"]
+    assert strata
+    assert sum(s["cuts"] for s in strata) == 3
+    assert sum(s["comparable"] for s in strata) == summary["comparable"]
+    for s in strata:
+        assert s["cuts"] == sum(s["status_counts"].values())
+        assert s["comparable"] == s["status_counts"].get("comparable", 0)
+        for kind, hits in s["matches_by_type"].items():
+            assert hits <= s["comparable"]
+            expected = (
+                round(hits / s["comparable"], 6) if s["comparable"] else None
+            )
+            assert s["match_fraction_by_type"][kind] == expected
+    assert summary["status_counts"]["ambiguous_slots"] > 0
