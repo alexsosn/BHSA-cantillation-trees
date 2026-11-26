@@ -66,8 +66,10 @@ def classify_root(osis, system, alignment, cut, marks, accent, final):
         status = "fuzzy_alignment"
     elif final not in FINAL_LABELS:
         status = "unmapped_final_accent"
-    elif category is None or (right == 1 and category == "Zaqef"):
+    elif category is None:
         status = "unmapped_cut_accent"
+    elif right == 1 and category == "Zaqef":
+        status = "not_in_published_category"
     elif right == 1 and category == "Atnah" and final == "Mëayla with Sof Pasuq":
         # p.202 n.9 excludes these; p.206 does not state that they were added.
         status = "maayla_exclusion"
@@ -120,6 +122,12 @@ def summarize(rows):
         "candidates": [
             r for r in rows if r.get("right_words") in (1, 2)
             or r["status"] in {"split_maqqef", "terminal_maqqef"}
+        ],
+        "examples": [
+            r for r in rows if r["osis_id"] in {
+                "1Kgs.8.45", "Josh.10.43", "Gen.1.1", "Gen.21.9",
+                "Gen.31.9", "Exod.12.45", "Exod.15.3",
+            }
         ],
         "no_root_verses": [r["osis_id"] for r in rows if r["status"] == "no_root"],
     }
