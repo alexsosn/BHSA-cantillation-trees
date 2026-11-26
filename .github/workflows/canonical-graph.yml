@@ -15,6 +15,9 @@ on:
       - "src/bhsa_cantillation/cli.py"
       - "src/bhsa_cantillation/boundaries.py"
       - "src/bhsa_cantillation/syntax_boundary.py"
+      - "src/bhsa_cantillation/hitin_mashiah.py"
+      - "scripts/reproduce_hitin_mashiah.py"
+      - "tests/test_hitin_mashiah.py"
       - "tests/test_syntax_boundary.py"
       - "tests/test_researcher_quickstart.py"
       - "README.md"
@@ -234,6 +237,157 @@ jobs:
               )
           print("Verified persisted boundaries, root source coordinates and determinism")
           PY
+
+      - name: Reproduce published main-division tables and independently check raw MorphHB
+        run: |
+          python scripts/reproduce_hitin_mashiah.py \
+            --graph build/canonical-graph/2021 --output build/hitin-mashiah.json
+          python - <<'PY'
+          import json
+          import unicodedata
+          import xml.etree.ElementTree as ET
+          from collections import Counter, defaultdict
+          from pathlib import Path
+
+          report = json.loads(Path("build/hitin-mashiah.json").read_text())
+          roots = {}
+          with Path("build/boundaries.jsonl").open(encoding="utf-8") as handle:
+              for line in handle:
+                  row = json.loads(line)
+                  if row["depth"] == 0:
+                      roots[row["osis_id"]] = row
+          assert report["graph_verses"] == 23213
+          assert len(roots) == 23202
+          assert report["source_uri"].endswith("3d15126fb1ef74867fc1434be1942e837932691f")
+          cat = Path("inputs/morphhb/structure/OshbVerse/Script/AccentCatalog.js").read_text()
+          catalog = json.loads(cat[cat.index("{"):cat.rindex("}")+1])["prose"]["disjunctive"]
+          # Independent mapping uses original codepoint keys, not report labels.
+          atnah = {"֑", "֖֑", "֣֑", "֥֑", "֑֙"}
+          tipha = {"֖", "֥֖"}
+          zaqef = {"֔", "֕", "֣֔", "֨֔"}
+          silluq = {"׃", "֖׃", "֥׃"}
+          assert atnah | tipha | zaqef | silluq <= set(catalog)
+          ns = "{http://www.bibletechnologies.net/2003/OSIS/namespace}"
+          seen = set()
+          counts = Counter()
+          cells = defaultdict(list)
+          candidates = {r["osis_id"]: r for r in report["candidates"]}
+          checked_candidates = set()
+          no_roots = []
+          examples = {}
+          def raw_key(text):
+              marks = "".join(
+                  c for c in unicodedata.normalize("NFD", text)
+                  if 0x591 <= ord(c) <= 0x5af or c in "ֽ־׀׃"
+              )
+              return marks if marks in catalog else marks.replace("ֽ", "")
+          for path in sorted(Path("inputs/morphhb/wlc").glob("*.xml")):
+              for verse in ET.parse(path).getroot().iter(ns + "verse"):
+                  osis = verse.get("osisID")
+                  if not osis:
+                      continue
+                  assert osis not in seen
+                  seen.add(osis)
+                  if osis not in roots:
+                      no_roots.append(osis)
+                      counts["no_root"] += 1
+                      continue
+                  root = roots[osis]
+                  # Read original direct w and seg children, not graph word features.
+                  # Variant readings replace only the accent-bearing final qere text.
+                  words, suffix = [], []
+                  for child in verse:
+                      if child.tag == ns + "w":
+                          words.append("".join(child.itertext()))
+                          suffix.append("")
+                      elif child.tag == ns + "seg" and words:
+                          suffix[-1] += "".join(child.itertext())
+                      elif child.tag == ns + "note" and words and child.get("type") == "variant":
+                          reading = child.find(ns + "rdg")
+                          qere = reading.findall(ns + "w") if reading is not None else []
+                          if qere:
+                              words[-1] = "".join(qere[-1].itertext())
+                  raw = [word + trail for word, trail in zip(words, suffix, strict=True)]
+                  cut = root["cut_after_word_index"]
+                  assert len(raw) == root["phrase_word_count"], osis
+                  # Count printed groups by their start positions, independently
+                  # of the producer's subtraction of maqqef links.
+                  starts = [i for i in range(len(raw)) if i == 0 or "־" not in raw[i-1]]
+                  length = len(starts)
+                  right = len([i for i in range(cut, len(raw))
+                               if i == cut or "־" not in raw[i-1]])
+                  a, z = raw_key(raw[cut-1]), raw_key(raw[-1])
+                  category = ("Atnah" if a in atnah else "Tipha" if a in tipha
+                              else "Zaqef" if a in zaqef else None)
+                  if osis.split(".")[0] in {"Ps", "Prov", "Job"} or root["system"] != "prose":
+                      status = "outside_21_books"
+                  elif "־" in raw[-1]:
+                      status = "terminal_maqqef"
+                  elif "־" in raw[cut-1]:
+                      status = "split_maqqef"
+                  elif right not in (1, 2):
+                      status = "other_right_length"
+                  elif root["alignment"] != "exact":
+                      status = "fuzzy_alignment"
+                  elif z not in silluq:
+                      status = "unmapped_final_accent"
+                  elif category is None:
+                      status = "unmapped_cut_accent"
+                  elif right == 1 and category == "Zaqef":
+                      status = "not_in_published_category"
+                  elif right == 1 and category == "Atnah" and z == "֖׃":
+                      status = "maayla_exclusion"
+                  else:
+                      status = "included"
+                  counts[status] += 1
+                  if right in (1, 2) or status in {"split_maqqef", "terminal_maqqef"}:
+                      measured = candidates[osis]
+                      checked_candidates.add(osis)
+                      assert (measured["source_words"], measured["source_right_words"],
+                              measured["words"], measured["right_words"], measured["status"]) == (
+                                  len(raw), len(raw)-cut, length, right, status
+                              ), (osis, measured, status)
+                  if osis in {"1Kgs.8.45", "Josh.10.43", "Gen.1.1", "Gen.21.9",
+                              "Gen.31.9", "Exod.12.45", "Exod.15.3"}:
+                      examples[osis] = (length, right, category)
+                  if status == "included":
+                      if right == 1:
+                          table = "one_word"
+                          group = "2-4" if length <= 4 else "5-8" if length <= 8 else "9+"
+                      else:
+                          table = "two_words"
+                          group = "3-4" if length <= 4 else "5-6" if length <= 6 else "7+"
+                          if category != "Atnah":
+                              category = "Tipha/Zaqef"
+                      cells[table, category, group].append(osis)
+          assert len(seen) == 23213 and set(roots) <= seen
+          assert sorted(no_roots) == report["no_root_verses"]
+          assert checked_candidates == set(candidates)
+          assert dict(counts) == report["status_counts"]
+          assert examples["1Kgs.8.45"] == (6, 2, "Atnah")
+          assert examples["Josh.10.43"] == (6, 2, "Zaqef")
+          assert examples["Exod.12.45"] == (3, 1, "Tipha")
+          assert examples["Gen.1.1"] == (7, 4, "Atnah")
+          assert examples["Gen.21.9"] == (7, 1, "Tipha")
+          assert examples["Gen.31.9"] == (5, 1, "Tipha")
+          assert examples["Exod.15.3"] == (5, 2, "Atnah")
+          for table, rows in report["tables"].items():
+              for cell in rows:
+                  expected = sorted(cells[table, cell["category"], cell["length_bin"]])
+                  assert cell["verses"] == expected
+                  assert cell["observed"] == len(expected)
+                  assert cell["delta"] == len(expected) - cell["published"]
+          print("Independently checked source XML word counts and all table cells:", dict(counts))
+          print("Cited examples:", examples)
+          print("Footnote 9:", [r["osis_id"] for r in candidates.values()
+                                if r["status"] == "maayla_exclusion"])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hitin-mashiah-reproduction
+          path: build/hitin-mashiah.json
+          retention-days: 14
 
       - name: Cross-check selected OSIS boundaries against full pinned export
         run: |
