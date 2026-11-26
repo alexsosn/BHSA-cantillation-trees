@@ -52,7 +52,7 @@ def test_footnote_nine_excluded_not_moved_to_other_table():
     ({"marks": ["", "", "", "־", "", "׃"]}, "split_maqqef"),
     ({"marks": ["", "", "", "", "", "־"]}, "terminal_maqqef"),
     ({"cut": 2}, "other_right_length"),
-    ({"cut": 5, "accent": "Zaqef Gadol"}, "unmapped_cut_accent"),
+    ({"cut": 5, "accent": "Zaqef Gadol"}, "not_in_published_category"),
 ])
 def test_explicit_exclusion_reasons(kwargs, status):
     assert candidate(**kwargs)["status"] == status
