@@ -466,6 +466,50 @@ syntactic or prosodic validity. The `half_verse` division belongs to a
 different BHSA structural tier. See the exact-slot-set research record in
 [issue #21](https://github.com/alexsosn/BHSA-cantillation-trees/issues/21).
 
+## Reproduce Hitin-Mashiah's main-division tables (development)
+
+The research script compares the pinned graph with the two objective count
+tables in Rachel Hitin-Mashiah, “Main Division in the Verse in the 21 Prose
+Books: Syntactic Study,” *Textus* 26 (2016), 199–208, [pp. 202 and 206](https://openscholar.huji.ac.il/sites/default/files/he_bible_project/files/main_division_in_the_verse_in_the_21.pdf).
+
+After building the full graph from the pinned sources (see the quickstart),
+run from a clone of the development branch:
+
+```bash
+python scripts/reproduce_hitin_mashiah.py \
+  --graph build/canonical-graph/2021 \
+  --output build/hitin-mashiah.json
+```
+
+The report contains observed and published counts, their signed differences,
+the OSIS IDs contributing to each cell, source provenance and explicit
+candidate/exclusion records. It uses only the saved graph and verifies the
+entire persisted tree hierarchy before writing the report.
+
+**Counting conventions.** The article's two six-word examples (1 Kgs 8:45
+and Josh 10:43, pp. 200–201) have eight direct MorphHB source records each;
+two maqqef links join these into six written groups. Accordingly this report
+counts chains joined by maqqef as one word and preserves the raw source-record
+counts separately. It does not redefine the module's `cantillation_word_count`.
+A cut splitting such a chain is excluded. Multiword qere represented by
+one direct MorphHB record may still differ from the printed edition.
+
+The main cut is the root of the saved binary tree. Exact original catalogue
+names (including compound accents) are mapped explicitly to Atnah, Tipha
+and Zaqef, and the final accent must correspond to the catalogue's Sof
+Pasuq family. Atnah immediately before a final Mëayla with Sof Pasuq is
+excluded from the first table (p. 202 n. 9); the four cases described there
+are not silently added to the second table. Counts are never tuned to match
+the paper. Primary scope excludes all of Job, Psalms and Proverbs; the
+article does not explicitly settle the treatment of Job's prose framing.
+Its candidate verses remain in the report, as do fuzzy-alignment candidates,
+which are excluded conservatively. Single-unit verses have no root cut.
+
+These are objective count comparisons, not a reconstruction of the paper's
+manual syntactic classifications. The publication does not provide complete
+verse-ID lists for its tables, so even identical cell counts would not
+establish verse-by-verse agreement. The script is post-v0.1.0 functionality.
+
 ## Inspect exact cantillation–syntax constituency relations
 
 Use `syntax-relations` to answer whether a saved accentual constituent is
